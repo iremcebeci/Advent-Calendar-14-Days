@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Day 5 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="../images/icon_light.png">
+	<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+	<div id="splash">
+		<img src="../images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="memory-game-container">
+			<div class="memory-grid" id="memoryGrid"></div>
+		</div>
+
+		<div class="popup hidden" id="memoryPopup">
+			<div class="popup-card">
+				<h2>Merry Christmas!</h2>
+				<p>You matched all the cards!</p>
+				<button id="memoryOkBtn">OK</button>
+			</div>
+		</div>
+
+	</div>
+	</div>
+
+	<script>
+		const snowLayer = document.getElementById("snow-layer");
+
+		function createSnowflake() {
+			const snowflake = document.createElement("div");
+			snowflake.className = "snowflake";
+			snowflake.innerHTML = "❄";
+
+			snowflake.style.left = Math.random() * 100 + "vw";
+			snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+			snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+			snowflake.style.opacity = Math.random();
+
+			snowLayer.appendChild(snowflake);
+
+			setTimeout(() => {
+				snowflake.remove();
+			}, 10000);
+		}
+
+		setInterval(createSnowflake, 90);
+
+		window.addEventListener("load", () => {
+			const splash = document.getElementById("splash");
+
+			setTimeout(() => {
+				splash.classList.add("hide");
+			}, 1500);
+		});
+
+		const images = [
+			"../images/card_front.png",
+			"../images/card_front2.png",
+			"../images/card_front3.png",
+			"../images/card_front4.png"
+		];
+
+		const cardBack = "../images/card_back.png";
+		const grid = document.getElementById("memoryGrid");
+		const popup = document.getElementById("memoryPopup");
+		const okBtn = document.getElementById("memoryOkBtn");
+
+		let cards = [];
+		let firstCard = null;
+		let secondCard = null;
+		let lockBoard = false;
+		let matchedCount = 0;
+
+		// 4 görseli 2 kere ekle (8 kart)
+		images.forEach(img => {
+			cards.push({ img });
+			cards.push({ img });
+		});
+
+		// shuffle
+		cards.sort(() => Math.random() - 0.5);
+
+		// render
+		cards.forEach((data, index) => {
+			const card = document.createElement("div");
+			card.className = "memory-card";
+			card.dataset.image = data.img;
+
+			card.innerHTML = `
+    <div class="memory-card-inner">
+      <div class="memory-card-front">
+        <img src="${data.img}">
+      </div>
+      <div class="memory-card-back">
+        <img src="${cardBack}">
+      </div>
+    </div>
+  `;
+
+			card.addEventListener("click", () => flipCard(card));
+			grid.appendChild(card);
+		});
+
+		function flipCard(card) {
+			if (lockBoard) return;
+			if (card === firstCard) return;
+
+			card.classList.add("flipped");
+
+			if (!firstCard) {
+				firstCard = card;
+				return;
+			}
+
+			secondCard = card;
+			checkMatch();
+		}
+
+		function checkMatch() {
+			const isMatch =
+				firstCard.dataset.image === secondCard.dataset.image;
+
+			if (isMatch) {
+				disableCards();
+			} else {
+				unflipCards();
+			}
+		}
+
+		function disableCards() {
+			firstCard.classList.add("matched");
+			secondCard.classList.add("matched");
+
+			matchedCount += 2;
+			resetTurn();
+
+			if (matchedCount === 8) {
+				setTimeout(() => popup.classList.remove("hidden"), 600);
+			}
+		}
+
+		function unflipCards() {
+			lockBoard = true;
+
+			setTimeout(() => {
+				firstCard.classList.remove("flipped");
+				secondCard.classList.remove("flipped");
+				resetTurn();
+			}, 800);
+		}
+
+		function resetTurn() {
+			[firstCard, secondCard] = [null, null];
+			lockBoard = false;
+		}
+
+		okBtn.addEventListener("click", () => {
+			popup.classList.add("hidden");
+		});
+
+	</script>
+</body>
+
+</html>

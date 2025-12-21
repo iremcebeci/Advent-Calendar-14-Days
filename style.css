@@ -679,6 +679,64 @@ body {
   cursor: default;
 }
 
+/* DAY 5 – MEMORY GAME */
+
+.memory-game-container {
+  grid-area: 2 / 2 / 5 / 7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.memory-card {
+  width: 110px;
+  height: 150px;
+  perspective: 800px;
+  cursor: pointer;
+}
+
+.memory-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.memory-card.flipped .memory-card-inner {
+  transform: rotateY(180deg);
+}
+
+.memory-card-front,
+.memory-card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 12px;
+}
+
+.memory-card-front {
+  transform: rotateY(180deg);
+}
+
+.memory-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.memory-card.matched {
+  pointer-events: none;
+  filter: brightness(1.1);
+}
+
 
 /* ANIMATIONS */
 
@@ -766,5 +824,19 @@ body {
     border-radius: 12px;
 
   }
+
+  .memory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 0.5fr);
+  gap: 5px;
+  }
+
+  .memory-card-inner {
+  width: 90%;
+  height: 90%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
 
 }
