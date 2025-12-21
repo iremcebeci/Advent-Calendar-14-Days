@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Day 1 | Advent Calendar</title>
+	<title>Day 4 | Advent Calendar</title>
 	<link rel="icon" type="image/png" href="../images/icon_light.png">
 	<link rel="stylesheet" href="../style.css">
 </head>
@@ -23,8 +23,27 @@
 		<div class="rightside"> </div>
 		<div class="footer"> </div>
 		<div class="tree-decoration">
+			<div class="tree-area" id="treeArea">
+				<img src="../images/tree.png" class="tree">
+			</div>
 
-			
+			<div class="decorations">
+				<img src="../images/tree_decoration.png" class="decor" draggable="false">
+				<img src="../images/tree_decoration2.png" class="decor" draggable="false">
+				<img src="../images/tree_decoration3.png" class="decor" draggable="false">
+				<img src="../images/tree_decoration4.png" class="decor" draggable="false">
+				<img src="../images/tree_decoration5.png" class="decor" draggable="false">
+				<img src="../images/tree_decoration6.png" class="decor" draggable="false">
+			</div>
+
+		</div>
+	</div>
+
+	<div class="popup hidden" id="completePopup">
+		<div class="popup-card">
+			<h2>Tree Completed!</h2>
+			<p>Happy New Year!</p>
+			<button id="popupOkBtn">OK</button>
 		</div>
 	</div>
 
@@ -57,6 +76,75 @@
 				splash.classList.add("hide");
 			}, 1500);
 		});
+
+		const treeArea = document.getElementById("treeArea");
+		const decors = document.querySelectorAll(".decor");
+		const popup = document.getElementById("completePopup");
+
+		let placedCount = 0;
+		let activeDecor = null;
+
+		decors.forEach(decor => {
+			decor.addEventListener("mousedown", e => {
+				if (decor.classList.contains("placed")) return;
+				activeDecor = decor;
+				decor.style.position = "absolute";
+				decor.style.zIndex = 10;
+				moveDecor(e);
+				const shiftX = e.clientX - decor.getBoundingClientRect().left;
+				const shiftY = e.clientY - decor.getBoundingClientRect().top;
+				activeDecor.shiftX = shiftX;
+				activeDecor.shiftY = shiftY;
+
+			});
+		});
+
+		document.addEventListener("mousemove", e => {
+			if (!activeDecor) return;
+			moveDecor(e);
+		});
+
+		document.addEventListener("mouseup", () => {
+			if (!activeDecor) return;
+
+			const treeRect = treeArea.getBoundingClientRect();
+			const decorRect = activeDecor.getBoundingClientRect();
+
+			if (
+				decorRect.left > treeRect.left &&
+				decorRect.right < treeRect.right &&
+				decorRect.top > treeRect.top &&
+				decorRect.bottom < treeRect.bottom
+			) {
+				const offsetX = decorRect.left - treeRect.left;
+				const offsetY = decorRect.top - treeRect.top;
+
+				activeDecor.style.left = offsetX + "px";
+				activeDecor.style.top = offsetY + "px";
+
+				activeDecor.classList.add("placed");
+				treeArea.appendChild(activeDecor);
+
+				placedCount++;
+				if (placedCount === 6) popup.classList.remove("hidden");
+			} else {
+				activeDecor.style.position = "static";
+			}
+
+			activeDecor = null;
+		});
+
+		function moveDecor(e) {
+			activeDecor.style.left = (e.pageX - activeDecor.shiftX) + "px";
+			activeDecor.style.top = (e.pageY - activeDecor.shiftY) + "px";
+		}
+
+		const popupOkBtn = document.getElementById("popupOkBtn");
+
+		popupOkBtn.addEventListener("click", () => {
+			popup.classList.add("hidden");
+		});
+
 
 	</script>
 </body>

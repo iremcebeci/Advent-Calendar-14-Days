@@ -1,6 +1,7 @@
 /* GENERAL STYLES */
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -60,26 +61,37 @@ body {
   color: white;
   font-size: 12px;
   opacity: 0.8;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,.6));
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .6));
   animation: fall linear infinite;
 }
 
 /* GRID LAYOUT */
 
 .parent {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	grid-template-rows: repeat(5, 1fr);
-	gap: 10px;
-	width: 100vw;
-	height: 100vh;
-	z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 10px;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
 }
 
-.title { grid-area: 1 / 2 / 2 / 7; }
-.leftside { grid-area: 1 / 1 / 5 / 2; }
-.rightside { grid-area: 1 / 7 / 5 / 8; }
-.footer { grid-area: 5 / 1 / 6 / 8; }
+.title {
+  grid-area: 1 / 2 / 2 / 7;
+}
+
+.leftside {
+  grid-area: 1 / 1 / 5 / 2;
+}
+
+.rightside {
+  grid-area: 1 / 7 / 5 / 8;
+}
+
+.footer {
+  grid-area: 5 / 1 / 6 / 8;
+}
 
 .title {
   background: url("images/title_light.png") center/60% no-repeat;
@@ -103,22 +115,61 @@ body {
   gap: 10px;
 }
 
-.day1  { grid-area: 1 / 1 / 2 / 2; }
-.day2  { grid-area: 1 / 2 / 2 / 3; }
-.day3  { grid-area: 1 / 3 / 2 / 4; }
-.day4  { grid-area: 1 / 4 / 2 / 5; }
-.day5  { grid-area: 1 / 5 / 2 / 6; }
+.day1 {
+  grid-area: 1 / 1 / 2 / 2;
+}
 
-.day6 { grid-area: 2 / 1 / 3 / 2; }
-.day7 { grid-area: 2 / 2 / 3 / 3; }
-.day8 { grid-area: 2 / 3 / 3 / 4; }
-.day9 { grid-area: 2 / 4 / 3 / 5; }
-.day10 { grid-area: 2 / 5 / 3 / 6; }
+.day2 {
+  grid-area: 1 / 2 / 2 / 3;
+}
 
-.day11 { grid-area: 3 / 1 / 4 / 2; }
-.day12 { grid-area: 3 / 2 / 4 / 3; }
-.day13 { grid-area: 3 / 3 / 4 / 4; }
-.day14 { grid-area: 3 / 4 / 4 / 6; }
+.day3 {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.day4 {
+  grid-area: 1 / 4 / 2 / 5;
+}
+
+.day5 {
+  grid-area: 1 / 5 / 2 / 6;
+}
+
+.day6 {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.day7 {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.day8 {
+  grid-area: 2 / 3 / 3 / 4;
+}
+
+.day9 {
+  grid-area: 2 / 4 / 3 / 5;
+}
+
+.day10 {
+  grid-area: 2 / 5 / 3 / 6;
+}
+
+.day11 {
+  grid-area: 3 / 1 / 4 / 2;
+}
+
+.day12 {
+  grid-area: 3 / 2 / 4 / 3;
+}
+
+.day13 {
+  grid-area: 3 / 3 / 4 / 4;
+}
+
+.day14 {
+  grid-area: 3 / 4 / 4 / 6;
+}
 
 /* CARD STYLES */
 
@@ -138,7 +189,7 @@ body {
 
 .card:hover {
   transform: translateY(-6px) scale(1.05);
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
 }
 
 .card-link {
@@ -149,7 +200,7 @@ body {
 
 /* HOME LINK OVERLAY */
 
-.home-link{
+.home-link {
   position: absolute;
   inset: 0;
   display: block;
@@ -158,24 +209,67 @@ body {
 
 /* CARD BACKGROUNDS */
 
-.day1  { background-image: url("images/01.png"); }
-.day2  { background-image: url("images/02.png"); }
-.day3  { background-image: url("images/03.png"); }
-.day4  { background-image: url("images/04.png"); }
-.day5  { background-image: url("images/05.png"); }
-.day6 { background-image: url("images/06.png"); }
-.day7 { background-image: url("images/07.png"); }
-.day8 { background-image: url("images/08.png"); }
-.day9 { background-image: url("images/09.png"); }
-.day10 { background-image: url("images/10.png"); }
-.day11 { background-image: url("images/11.png"); }
-.day12 { background-image: url("images/12.png"); }
-.day13 { background-image: url("images/13.png"); }
-.day14 { background-image: url("images/14.png"); }
+.day1 {
+  background-image: url("images/01.png");
+}
+
+.day2 {
+  background-image: url("images/02.png");
+}
+
+.day3 {
+  background-image: url("images/03.png");
+}
+
+.day4 {
+  background-image: url("images/04.png");
+}
+
+.day5 {
+  background-image: url("images/05.png");
+}
+
+.day6 {
+  background-image: url("images/06.png");
+}
+
+.day7 {
+  background-image: url("images/07.png");
+}
+
+.day8 {
+  background-image: url("images/08.png");
+}
+
+.day9 {
+  background-image: url("images/09.png");
+}
+
+.day10 {
+  background-image: url("images/10.png");
+}
+
+.day11 {
+  background-image: url("images/11.png");
+}
+
+.day12 {
+  background-image: url("images/12.png");
+}
+
+.day13 {
+  background-image: url("images/13.png");
+}
+
+.day14 {
+  background-image: url("images/14.png");
+}
 
 /* DAY 1: BELL */
 
-.bell-container { grid-area: 2 / 2 / 5 / 7; }
+.bell-container {
+  grid-area: 2 / 2 / 5 / 7;
+}
 
 .bell-container {
   display: flex;
@@ -216,7 +310,9 @@ body {
 
 /* DAY 2: GIFT CATCHER */
 
-.gift-catcher-container { grid-area: 2 / 2 / 5 / 7; }
+.gift-catcher-container {
+  grid-area: 2 / 2 / 5 / 7;
+}
 
 .gift-catcher-container {
   display: flex;
@@ -233,14 +329,14 @@ body {
   width: 100%;
   height: 100%;
   min-height: 320px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 18px;
   overflow: hidden;
 }
 
 .score-area {
   flex: 1;
-  background: rgba(0,0,0,0.25);
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 18px;
   padding: 16px;
   color: #fff;
@@ -262,14 +358,14 @@ body {
 }
 
 .score-area .score-box img {
-	  width: 32px;
+  width: 32px;
   margin-right: 8px;
 }
 
-.score-area img{
-	width: 200px;
-  	margin-top: 20px;
-  	opacity: 0.8;
+.score-area img {
+  width: 200px;
+  margin-top: 20px;
+  opacity: 0.8;
 }
 
 .gift {
@@ -304,7 +400,7 @@ body {
 .game-over {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, .55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -317,7 +413,7 @@ body {
 
 .game-over-card {
   background: rgba(15, 42, 34, .95);
-  border: 1px solid rgba(255,255,255,.15);
+  border: 1px solid rgba(255, 255, 255, .15);
   padding: 18px 18px;
   border-radius: 16px;
   text-align: center;
@@ -350,7 +446,7 @@ body {
 .start-screen {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -372,7 +468,9 @@ body {
 
 /* DAY 3: NEW YEAR WORLDLE */
 
-.newyear-worldle { grid-area: 2 / 2 / 5 / 7; }
+.newyear-worldle {
+  grid-area: 2 / 2 / 5 / 7;
+}
 
 .wordle-wrapper {
   grid-area: 2 / 2 / 5 / 7;
@@ -396,9 +494,9 @@ body {
   -webkit-appearance: none;
   -moz-appearance: none;
 
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 12px;
   padding: 8px 36px 8px 12px;
 
@@ -420,7 +518,7 @@ body {
 }
 
 .wordle-header select:hover {
-  background-color: rgba(255,255,255,0.18);
+  background-color: rgba(255, 255, 255, 0.18);
 }
 
 .wordle-header select:focus {
@@ -449,7 +547,7 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -458,9 +556,17 @@ body {
   text-transform: uppercase;
 }
 
-.cell.correct { background: #2ecc71; }
-.cell.present { background: #f1c40f; }
-.cell.absent  { background: #555; }
+.cell.correct {
+  background: #2ecc71;
+}
+
+.cell.present {
+  background: #f1c40f;
+}
+
+.cell.absent {
+  background: #555;
+}
 
 .wordle-controls {
   display: flex;
@@ -491,7 +597,7 @@ body {
 .popup {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -503,7 +609,7 @@ body {
 }
 
 .popup-card {
-  background: rgba(15,42,34,0.95);
+  background: rgba(15, 42, 34, 0.95);
   border-radius: 18px;
   padding: 22px 26px;
   text-align: center;
@@ -529,6 +635,49 @@ body {
   cursor: pointer;
 }
 
+/* DAY 4: TREE DECORATION */
+
+.tree-decoration { grid-area: 2 / 2 / 5 / 7; }
+
+.tree-decoration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tree-area {
+  position: relative;
+  width: 280px;
+  height: 360px;
+  margin-top: 20px;
+}
+
+.tree {
+  width: 100%;
+  pointer-events: none;
+}
+
+.decorations {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.decor {
+  width: 40px;
+  cursor: grab;
+  transition: transform .15s ease;
+}
+
+.decor:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+}
+
+.decor.placed {
+  cursor: default;
+}
 
 
 /* ANIMATIONS */
@@ -538,6 +687,7 @@ body {
   from {
     transform: translateY(0);
   }
+
   to {
     transform: translateY(120%);
   }
@@ -545,9 +695,20 @@ body {
 
 /* splash pulse */
 @keyframes pulse {
-  0%   { transform: scale(1); opacity: .8; }
-  50%  { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: .8; }
+  0% {
+    transform: scale(1);
+    opacity: .8;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: .8;
+  }
 }
 
 /* snow falling */
@@ -555,6 +716,7 @@ body {
   from {
     transform: translateY(-10px);
   }
+
   to {
     transform: translateY(110vh);
   }
@@ -566,6 +728,7 @@ body {
     transform: scale(0.85);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -577,31 +740,31 @@ body {
 
 @media (max-width: 900px) {
 
-	body {
+  body {
     align-items: flex-start;
   }
-  
-	.parent {
-		height: 100vh;
-	}
 
-	.cards {
-		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-		grid-template-rows: auto;
-	}
+  .parent {
+    height: 100vh;
+  }
 
-	.card {
-		grid-area: auto;
-	}
+  .cards {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-rows: auto;
+  }
+
+  .card {
+    grid-area: auto;
+  }
 
   .bell-container {
     max-height: 300px;
   }
 
-	.title {
-  background: url("images/title_light_mobile.png") center/60% no-repeat;
-  border-radius: 12px;
+  .title {
+    background: url("images/title_light_mobile.png") center/60% no-repeat;
+    border-radius: 12px;
 
-}
-	
+  }
+
 }

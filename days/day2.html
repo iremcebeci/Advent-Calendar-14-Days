@@ -1,252 +1,255 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Day 2 | Advent Calendar</title>
-	<link rel="icon" type="image/png" href="../images/icon_light.png">
-	<link rel="stylesheet" href="../style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Day 2 | Advent Calendar</title>
+  <link rel="icon" type="image/png" href="../images/icon_light.png">
+  <link rel="stylesheet" href="../style.css">
 </head>
+
 <body>
-	<div id="splash">
-		<img src="../images/icon_light.png" alt="Loading">
-		<p>Preparing the gifts...</p>
-	</div>
+  <div id="splash">
+    <img src="../images/icon_light.png" alt="Loading">
+    <p>Preparing the gifts...</p>
+  </div>
 
-	<div id="snow-layer"></div>
+  <div id="snow-layer"></div>
 
-	<div class="parent">
-		<div class="title"><a href="../index.html" class="home-link"></a></div>
-		<div class="leftside"> </div>
-		<div class="rightside"> </div>
-		<div class="footer"> </div>
-		<div class="gift-catcher-container">
-			<div class="game-wrapper">
-    <div class="game-area" id="gameArea">
-      <img id="bag" class="bag" src="../images/santasbag.png" alt="Santa Bag">
+  <div class="parent">
+    <div class="title"><a href="../index.html" class="home-link"></a></div>
+    <div class="leftside"> </div>
+    <div class="rightside"> </div>
+    <div class="footer"> </div>
+    <div class="gift-catcher-container">
+      <div class="game-wrapper">
+        <div class="game-area" id="gameArea">
+          <img id="bag" class="bag" src="../images/santasbag.png" alt="Santa Bag">
 
-	  <div id="startScreen" class="start-screen">
-  <button id="startBtn">🎄 Başlat</button>
-</div>
+          <div id="startScreen" class="start-screen">
+            <button id="startBtn">🎄 Başlat</button>
+          </div>
 
-      <div id="gameOver" class="game-over hidden">
-        <div class="game-over-card">
-          <h2>GAME OVER</h2>
-          <p>Skor: <span id="finalScore">0</span></p>
-          <button id="restartBtn">Tekrar Oyna</button>
+          <div id="gameOver" class="game-over hidden">
+            <div class="game-over-card">
+              <h2>GAME OVER</h2>
+              <p>Skor: <span id="finalScore">0</span></p>
+              <button id="restartBtn">Tekrar Oyna</button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="score-area">
+        <h3>Score</h3>
+        <div class="score-box">
+          <img src="../images/gift.png" alt=""> <span id="score">0</span>
+        </div>
+        <img src="../images/santasbag_and_gifts.png" alt="">
+      </div>
+
     </div>
   </div>
 
-  <div class="score-area">
-    <h3>Score</h3>
-    <div class="score-box">
-      <img src="../images/gift.png" alt=""> <span id="score">0</span>
-    </div>
-	<img src="../images/santasbag_and_gifts.png" alt="">
-  </div>
-			
-		</div>
-  </div>
+  <script>
+    /* ---------------- SNOW ---------------- */
+    const snowLayer = document.getElementById("snow-layer");
 
-	<script>
-/* ---------------- SNOW ---------------- */
-const snowLayer = document.getElementById("snow-layer");
+    function createSnowflake() {
+      const snowflake = document.createElement("div");
+      snowflake.className = "snowflake";
+      snowflake.innerHTML = "❄";
 
-function createSnowflake() {
-  const snowflake = document.createElement("div");
-  snowflake.className = "snowflake";
-  snowflake.innerHTML = "❄";
+      snowflake.style.left = Math.random() * 100 + "vw";
+      snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+      snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+      snowflake.style.opacity = Math.random();
 
-  snowflake.style.left = Math.random() * 100 + "vw";
-  snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
-  snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
-  snowflake.style.opacity = Math.random();
-
-  snowLayer.appendChild(snowflake);
-  setTimeout(() => snowflake.remove(), 10000);
-}
-
-setInterval(createSnowflake, 90);
-
-window.addEventListener("load", () => {
-  const splash = document.getElementById("splash");
-  setTimeout(() => splash.classList.add("hide"), 1500);
-});
-
-
-/* ---------------- GAME ---------------- */
-const gameArea = document.getElementById("gameArea");
-const scoreEl = document.getElementById("score");
-const bagEl = document.getElementById("bag");
-
-const startScreen = document.getElementById("startScreen");
-const startBtn = document.getElementById("startBtn");
-
-const gameOverEl = document.getElementById("gameOver");
-const finalScoreEl = document.getElementById("finalScore");
-const restartBtn = document.getElementById("restartBtn");
-
-let score = 0;
-let running = false; // ❗ oyun sadece butonla başlar
-
-const gifts = [];
-
-/* --- AYARLAR --- */
-const spawnEveryMs = 650;   // düşme sıklığı
-const speedMin = 110;       // min hız
-const speedMax = 200;       // max hız
-
-
-/* --- HELPERS --- */
-function rect(el) {
-  return el.getBoundingClientRect();
-}
-
-function isColliding(a, b) {
-  return !(
-    a.right < b.left ||
-    a.left > b.right ||
-    a.bottom < b.top ||
-    a.top > b.bottom
-  );
-}
-
-function clamp(v, min, max) {
-  return Math.max(min, Math.min(max, v));
-}
-
-
-/* --- BAG MOVE --- */
-function moveBag(clientX) {
-  const areaRect = rect(gameArea);
-  const bagRect = rect(bagEl);
-  const x = clientX - areaRect.left - bagRect.width / 2;
-  const maxX = gameArea.clientWidth - bagRect.width;
-  bagEl.style.left = clamp(x, 0, maxX) + "px";
-}
-
-gameArea.addEventListener("mousemove", e => {
-  if (!running) return;
-  moveBag(e.clientX);
-});
-
-gameArea.addEventListener("touchmove", e => {
-  if (!running) return;
-  if (!e.touches.length) return;
-  moveBag(e.touches[0].clientX);
-  e.preventDefault();
-}, { passive: false });
-
-
-/* --- CREATE GIFT --- */
-function createGift() {
-  if (!running) return;
-
-  const gift = document.createElement("img");
-  gift.src = "../images/gift.png";
-  gift.className = "gift-img";
-
-  const size = 28 + Math.random() * 20;
-  gift.style.width = size + "px";
-
-  // %80 orta alan
-  const areaWidth = gameArea.clientWidth - size;
-  const minX = areaWidth * 0.1;
-  const maxX = areaWidth * 0.9;
-  const x = minX + Math.random() * (maxX - minX);
-
-  gift.style.left = x + "px";
-  gift.style.top = "-60px";
-
-  const speed = speedMin + Math.random() * (speedMax - speedMin);
-
-  gifts.push({ el: gift, y: -60, speed });
-  gameArea.appendChild(gift);
-}
-
-
-/* --- GAME FLOW --- */
-function resetGame() {
-  gifts.forEach(g => g.el.remove());
-  gifts.length = 0;
-
-  score = 0;
-  scoreEl.textContent = "0";
-
-  gameOverEl.classList.add("hidden");
-  startScreen.classList.remove("hidden");
-
-  // bag ortala
-  const w = gameArea.clientWidth;
-  const bagW = bagEl.getBoundingClientRect().width || 120;
-  bagEl.style.left = (w - bagW) / 2 + "px";
-
-  running = false;
-}
-
-function endGame() {
-  running = false;
-  finalScoreEl.textContent = score;
-  gameOverEl.classList.remove("hidden");
-}
-
-startBtn.addEventListener("click", () => {
-  running = true;
-  startScreen.classList.add("hidden");
-});
-
-restartBtn.addEventListener("click", () => {
-  resetGame();
-});
-
-
-/* --- LOOPS --- */
-setInterval(createGift, spawnEveryMs);
-
-let last = performance.now();
-function tick(now) {
-  const dt = (now - last) / 1000;
-  last = now;
-
-  if (running) {
-    const bagR = rect(bagEl);
-    const areaRect = rect(gameArea);
-    const areaH = gameArea.clientHeight;
-
-    for (let i = gifts.length - 1; i >= 0; i--) {
-      const g = gifts[i];
-      g.y += g.speed * dt;
-      g.el.style.top = g.y + "px";
-
-      const giftR = rect(g.el);
-
-      // yakalandı
-      if (isColliding(giftR, bagR)) {
-        score++;
-        scoreEl.textContent = score;
-        g.el.remove();
-        gifts.splice(i, 1);
-        continue;
-      }
-
-      // yere düştü
-      if (giftR.bottom - areaRect.top >= areaH) {
-        endGame();
-        break;
-      }
+      snowLayer.appendChild(snowflake);
+      setTimeout(() => snowflake.remove(), 10000);
     }
-  }
 
-  requestAnimationFrame(tick);
-}
+    setInterval(createSnowflake, 90);
+
+    window.addEventListener("load", () => {
+      const splash = document.getElementById("splash");
+      setTimeout(() => splash.classList.add("hide"), 1500);
+    });
 
 
-/* --- INIT --- */
-resetGame();
-requestAnimationFrame(tick);
-</script>
+    /* ---------------- GAME ---------------- */
+    const gameArea = document.getElementById("gameArea");
+    const scoreEl = document.getElementById("score");
+    const bagEl = document.getElementById("bag");
+
+    const startScreen = document.getElementById("startScreen");
+    const startBtn = document.getElementById("startBtn");
+
+    const gameOverEl = document.getElementById("gameOver");
+    const finalScoreEl = document.getElementById("finalScore");
+    const restartBtn = document.getElementById("restartBtn");
+
+    let score = 0;
+    let running = false; // ❗ oyun sadece butonla başlar
+
+    const gifts = [];
+
+    /* --- AYARLAR --- */
+    const spawnEveryMs = 650;   // düşme sıklığı
+    const speedMin = 110;       // min hız
+    const speedMax = 200;       // max hız
+
+
+    /* --- HELPERS --- */
+    function rect(el) {
+      return el.getBoundingClientRect();
+    }
+
+    function isColliding(a, b) {
+      return !(
+        a.right < b.left ||
+        a.left > b.right ||
+        a.bottom < b.top ||
+        a.top > b.bottom
+      );
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+
+    /* --- BAG MOVE --- */
+    function moveBag(clientX) {
+      const areaRect = rect(gameArea);
+      const bagRect = rect(bagEl);
+      const x = clientX - areaRect.left - bagRect.width / 2;
+      const maxX = gameArea.clientWidth - bagRect.width;
+      bagEl.style.left = clamp(x, 0, maxX) + "px";
+    }
+
+    gameArea.addEventListener("mousemove", e => {
+      if (!running) return;
+      moveBag(e.clientX);
+    });
+
+    gameArea.addEventListener("touchmove", e => {
+      if (!running) return;
+      if (!e.touches.length) return;
+      moveBag(e.touches[0].clientX);
+      e.preventDefault();
+    }, { passive: false });
+
+
+    /* --- CREATE GIFT --- */
+    function createGift() {
+      if (!running) return;
+
+      const gift = document.createElement("img");
+      gift.src = "../images/gift.png";
+      gift.className = "gift-img";
+
+      const size = 28 + Math.random() * 20;
+      gift.style.width = size + "px";
+
+      // %80 orta alan
+      const areaWidth = gameArea.clientWidth - size;
+      const minX = areaWidth * 0.1;
+      const maxX = areaWidth * 0.9;
+      const x = minX + Math.random() * (maxX - minX);
+
+      gift.style.left = x + "px";
+      gift.style.top = "-60px";
+
+      const speed = speedMin + Math.random() * (speedMax - speedMin);
+
+      gifts.push({ el: gift, y: -60, speed });
+      gameArea.appendChild(gift);
+    }
+
+
+    /* --- GAME FLOW --- */
+    function resetGame() {
+      gifts.forEach(g => g.el.remove());
+      gifts.length = 0;
+
+      score = 0;
+      scoreEl.textContent = "0";
+
+      gameOverEl.classList.add("hidden");
+      startScreen.classList.remove("hidden");
+
+      // bag ortala
+      const w = gameArea.clientWidth;
+      const bagW = bagEl.getBoundingClientRect().width || 120;
+      bagEl.style.left = (w - bagW) / 2 + "px";
+
+      running = false;
+    }
+
+    function endGame() {
+      running = false;
+      finalScoreEl.textContent = score;
+      gameOverEl.classList.remove("hidden");
+    }
+
+    startBtn.addEventListener("click", () => {
+      running = true;
+      startScreen.classList.add("hidden");
+    });
+
+    restartBtn.addEventListener("click", () => {
+      resetGame();
+    });
+
+
+    /* --- LOOPS --- */
+    setInterval(createGift, spawnEveryMs);
+
+    let last = performance.now();
+    function tick(now) {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      if (running) {
+        const bagR = rect(bagEl);
+        const areaRect = rect(gameArea);
+        const areaH = gameArea.clientHeight;
+
+        for (let i = gifts.length - 1; i >= 0; i--) {
+          const g = gifts[i];
+          g.y += g.speed * dt;
+          g.el.style.top = g.y + "px";
+
+          const giftR = rect(g.el);
+
+          // yakalandı
+          if (isColliding(giftR, bagR)) {
+            score++;
+            scoreEl.textContent = score;
+            g.el.remove();
+            gifts.splice(i, 1);
+            continue;
+          }
+
+          // yere düştü
+          if (giftR.bottom - areaRect.top >= areaH) {
+            endGame();
+            break;
+          }
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+
+    /* --- INIT --- */
+    resetGame();
+    requestAnimationFrame(tick);
+  </script>
 
 </body>
+
 </html>
