@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Day 6 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="../images/icon_light.png">
+	<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+	<div id="splash">
+		<img src="../images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="sudoku-container">
+			<div class="sudoku-board" id="sudokuBoard"></div>
+
+			<div class="emoji-picker" id="emojiPicker"></div>
+		</div>
+
+		<div class="popup hidden" id="sudokuPopup">
+			<div class="popup-card">
+				<h2>🎄 Well Done!</h2>
+				<p>You solved the Sudoku!</p>
+				<button id="sudokuOkBtn">OK</button>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		/* ---------------- SNOW ---------------- */
+		const snowLayer = document.getElementById("snow-layer");
+
+		function createSnowflake() {
+			const snowflake = document.createElement("div");
+			snowflake.className = "snowflake";
+			snowflake.innerHTML = "❄";
+
+			snowflake.style.left = Math.random() * 100 + "vw";
+			snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+			snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+			snowflake.style.opacity = Math.random();
+
+			snowLayer.appendChild(snowflake);
+			setTimeout(() => snowflake.remove(), 10000);
+		}
+		setInterval(createSnowflake, 90);
+
+		window.addEventListener("load", () => {
+			setTimeout(() => {
+				document.getElementById("splash").classList.add("hide");
+			}, 1500);
+		});
+
+		/* ---------------- EMOJI SUDOKU ---------------- */
+
+		const EMOJIS = ["🎄", "🎅", "🎁", "⛄", "❄️", "🔔", "⭐", "🍭", "🧦"];
+
+		const boardEl = document.getElementById("sudokuBoard");
+		const pickerEl = document.getElementById("emojiPicker");
+		const popup = document.getElementById("sudokuPopup");
+		const okBtn = document.getElementById("sudokuOkBtn");
+
+		let selectedCell = null;
+
+		/* ---------- SOLUTIONS ---------- */
+		const SOLUTIONS = [
+			[
+				["🎄", "🎅", "🎁", "⛄", "❄️", "🔔", "⭐", "🍭", "🧦"],
+				["⛄", "❄️", "🔔", "⭐", "🍭", "🧦", "🎄", "🎅", "🎁"],
+				["⭐", "🍭", "🧦", "🎄", "🎅", "🎁", "⛄", "❄️", "🔔"],
+
+				["🎅", "🎁", "🎄", "❄️", "🔔", "⛄", "🍭", "🧦", "⭐"],
+				["❄️", "🔔", "⛄", "🍭", "🧦", "⭐", "🎅", "🎁", "🎄"],
+				["🍭", "🧦", "⭐", "🎅", "🎁", "🎄", "❄️", "🔔", "⛄"],
+
+				["🎁", "🎄", "🎅", "🔔", "⛄", "❄️", "🧦", "⭐", "🍭"],
+				["🔔", "⛄", "❄️", "🧦", "⭐", "🍭", "🎁", "🎄", "🎅"],
+				["🧦", "⭐", "🍭", "🎁", "🎄", "🎅", "🔔", "⛄", "❄️"]
+			],
+			[
+				["🎅", "🎁", "🎄", "⭐", "🍭", "🧦", "⛄", "❄️", "🔔"],
+				["⭐", "🍭", "🧦", "⛄", "❄️", "🔔", "🎅", "🎁", "🎄"],
+				["⛄", "❄️", "🔔", "🎅", "🎁", "🎄", "⭐", "🍭", "🧦"],
+
+				["🎁", "🎄", "🎅", "🍭", "🧦", "⭐", "❄️", "🔔", "⛄"],
+				["🍭", "🧦", "⭐", "❄️", "🔔", "⛄", "🎁", "🎄", "🎅"],
+				["❄️", "🔔", "⛄", "🎁", "🎄", "🎅", "🍭", "🧦", "⭐"],
+
+				["🎄", "🎅", "🎁", "🧦", "⭐", "🍭", "🔔", "⛄", "❄️"],
+				["🧦", "⭐", "🍭", "🔔", "⛄", "❄️", "🎄", "🎅", "🎁"],
+				["🔔", "⛄", "❄️", "🎄", "🎅", "🎁", "🧦", "⭐", "🍭"]
+			]
+		];
+
+		const solution = SOLUTIONS[Math.floor(Math.random() * SOLUTIONS.length)];
+
+		/* ---------- PUZZLE GENERATE ---------- */
+		const puzzle = solution.map(row =>
+			row.map(v => Math.random() < 0.45 ? "" : v)
+		);
+
+		/* current board (GERÇEK KURALLAR İÇİN) */
+		const currentBoard = puzzle.map(row => [...row]);
+
+		/* ---------- RENDER BOARD ---------- */
+		puzzle.forEach((row, r) => {
+			row.forEach((cell, c) => {
+				const div = document.createElement("div");
+				div.className = "sudoku-cell";
+				div.dataset.row = r;
+				div.dataset.col = c;
+
+				if (cell) {
+					div.textContent = cell;
+					div.classList.add("fixed");
+				}
+
+				div.addEventListener("click", () => {
+					if (div.classList.contains("fixed")) return;
+
+					document.querySelectorAll(".sudoku-cell")
+						.forEach(c => c.classList.remove("selected"));
+
+					div.classList.add("selected");
+					selectedCell = div;
+				});
+
+				boardEl.appendChild(div);
+			});
+		});
+
+		/* ---------- EMOJI PICKER ---------- */
+		EMOJIS.forEach(e => {
+			const btn = document.createElement("button");
+			btn.textContent = e;
+			btn.addEventListener("click", () => placeEmoji(e));
+			pickerEl.appendChild(btn);
+		});
+
+		/* ---------- SUDOKU RULE CHECK ---------- */
+		function isValidPlacement(row, col, emoji) {
+			// row
+			for (let c = 0; c < 9; c++) {
+				if (currentBoard[row][c] === emoji) return false;
+			}
+
+			// column
+			for (let r = 0; r < 9; r++) {
+				if (currentBoard[r][col] === emoji) return false;
+			}
+
+			// 3x3 block
+			const startRow = Math.floor(row / 3) * 3;
+			const startCol = Math.floor(col / 3) * 3;
+
+			for (let r = startRow; r < startRow + 3; r++) {
+				for (let c = startCol; c < startCol + 3; c++) {
+					if (currentBoard[r][c] === emoji) return false;
+				}
+			}
+
+			return true;
+		}
+
+		/* ---------- PLACE EMOJI ---------- */
+		function placeEmoji(emoji) {
+			if (!selectedCell) return;
+
+			const r = Number(selectedCell.dataset.row);
+			const c = Number(selectedCell.dataset.col);
+
+			// 1️⃣ SADECE SUDOKU KURALI
+			if (!isValidPlacement(r, c, emoji)) {
+				selectedCell.classList.add("error");
+				setTimeout(() => selectedCell.classList.remove("error"), 400);
+				return;
+			}
+
+			// 2️⃣ KURAL GEÇTİ → EMOJIYI KOY
+			selectedCell.textContent = emoji;
+			currentBoard[r][c] = emoji;
+
+			selectedCell.classList.remove("selected");
+			selectedCell = null;
+
+			// 3️⃣ SADECE BURADA solution kontrolü
+			checkWin();
+		}
+
+		/* ---------- WIN CHECK ---------- */
+		function checkWin() {
+			const cells = document.querySelectorAll(".sudoku-cell");
+			for (let cell of cells) {
+				const r = cell.dataset.row;
+				const c = cell.dataset.col;
+				if (cell.textContent !== solution[r][c]) return;
+			}
+			popup.classList.remove("hidden");
+		}
+
+		okBtn.addEventListener("click", () => {
+			popup.classList.add("hidden");
+		});
+	</script>
+
+</body>
+
+</html>
