@@ -4,26 +4,26 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Day 2 | Advent Calendar</title>
-	<link rel="icon" type="image/png" href="images/icon_light.png">
-	<link rel="stylesheet" href="style.css">
+	<link rel="icon" type="image/png" href="../images/icon_light.png">
+	<link rel="stylesheet" href="../style.css">
 </head>
 <body>
 	<div id="splash">
-		<img src="images/icon_light.png" alt="Loading">
+		<img src="../images/icon_light.png" alt="Loading">
 		<p>Preparing the gifts...</p>
 	</div>
 
 	<div id="snow-layer"></div>
 
 	<div class="parent">
-		<div class="title"><a href="index.html" class="home-link"></a></div>
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
 		<div class="leftside"> </div>
 		<div class="rightside"> </div>
 		<div class="footer"> </div>
 		<div class="gift-catcher-container">
 			<div class="game-wrapper">
     <div class="game-area" id="gameArea">
-      <img id="bag" class="bag" src="images/santasbag.png" alt="Santa Bag">
+      <img id="bag" class="bag" src="../images/santasbag.png" alt="Santa Bag">
 
 	  <div id="startScreen" class="start-screen">
   <button id="startBtn">🎄 Başlat</button>
@@ -42,9 +42,9 @@
   <div class="score-area">
     <h3>Score</h3>
     <div class="score-box">
-      <img src="images/gift.png" alt=""> <span id="score">0</span>
+      <img src="../images/gift.png" alt=""> <span id="score">0</span>
     </div>
-	<img src="images/santasbag_and_gifts.png" alt="">
+	<img src="../images/santasbag_and_gifts.png" alt="">
   </div>
 			
 		</div>
@@ -145,7 +145,7 @@ function createGift() {
   if (!running) return;
 
   const gift = document.createElement("img");
-  gift.src = "images/gift.png";
+  gift.src = "../images/gift.png";
   gift.className = "gift-img";
 
   const size = 28 + Math.random() * 20;
