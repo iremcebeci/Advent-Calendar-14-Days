@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Day 3 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="images/icon_light.png">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="splash">
+		<img src="images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="newyear-worldle">
+			<div class="wordle-wrapper">
+
+  <div class="wordle-header">
+    <h2 id="gameTitle">New Year Wordle</h2>
+    <select id="languageSelect">
+      <option value="en">EN</option>
+      <option value="tr">TR</option>
+    </select>
+  </div>
+
+  <div id="wordle-board">
+    <!-- 5 ROW -->
+    <div class="wordle-row">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wordle-row">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wordle-row">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wordle-row">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="wordle-row">
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+  </div>
+
+  <div class="wordle-controls">
+  <input id="guessInput" maxlength="5">
+  <button id="guessBtn">GUESS</button>
+</div>
+
+  <p id="message"></p>
+</div>
+		</div>
+	</div>
+
+	<div id="resultPopup" class="popup hidden">
+  <div class="popup-card">
+    <h2 id="popupTitle"></h2>
+    <p id="popupText"></p>
+    <button id="popupBtn">OK</button>
+  </div>
+</div>
+	<script>
+	const snowLayer = document.getElementById("snow-layer");
+
+	function createSnowflake() {
+		const snowflake = document.createElement("div");
+		snowflake.className = "snowflake";
+		snowflake.innerHTML = "❄";
+
+		snowflake.style.left = Math.random() * 100 + "vw";
+		snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+		snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+		snowflake.style.opacity = Math.random();
+
+		snowLayer.appendChild(snowflake);
+
+		setTimeout(() => {
+			snowflake.remove();
+		}, 10000);
+	}
+
+	setInterval(createSnowflake, 90);
+
+	window.addEventListener("load", () => {
+	const splash = document.getElementById("splash");
+
+	setTimeout(() => {
+			splash.classList.add("hide");
+		}, 1500);
+	});
+
+
+
+
+const WORDS = {
+  tr: ["KAZAK","MUTLU","SÜSLÜ","KARLI","SOĞUK","ÇORAP","SALEP","KAHVE"],
+  en: ["SANTA","BELLS","SNOWY","TREES","GIFTS","LIGHT","MERRY","PARTY"]
+};
+
+let currentLang = localStorage.getItem("lang") || "en";
+let secretWord = "";
+let currentRow = 0;
+
+const rows = document.querySelectorAll(".wordle-row");
+const input = document.getElementById("guessInput");
+const btn = document.getElementById("guessBtn");
+const langSelect = document.getElementById("languageSelect");
+const title = document.getElementById("gameTitle");
+
+/* POPUP ELEMENTS */
+const popup = document.getElementById("resultPopup");
+const popupTitle = document.getElementById("popupTitle");
+const popupText = document.getElementById("popupText");
+const popupBtn = document.getElementById("popupBtn");
+
+langSelect.value = currentLang;
+
+/* ---------- LANGUAGE ---------- */
+function updateLanguageUI() {
+  if (currentLang === "tr") {
+    title.innerText = "Yılbaşı Wordle";
+    input.placeholder = "5 harfli kelime";
+    btn.innerText = "TAHMİN ET";
+  } else {
+    title.innerText = "New Year Wordle";
+    input.placeholder = "5 letter word";
+    btn.innerText = "GUESS";
+  }
+}
+
+/* ---------- POPUP ---------- */
+function showPopup(title, text) {
+  popupTitle.innerText = title;
+  popupText.innerText = text;
+  popup.classList.remove("hidden");
+}
+
+popupBtn.addEventListener("click", () => {
+  popup.classList.add("hidden");
+  resetGame();
+});
+
+/* ---------- WORD PICK ---------- */
+function pickWord() {
+  const pool = WORDS[currentLang];
+  secretWord = pool[Math.floor(Math.random() * pool.length)];
+  console.log("SECRET:", secretWord);
+}
+
+/* ---------- RESET ---------- */
+function resetGame() {
+  currentRow = 0;
+  input.disabled = false;
+
+  rows.forEach(row =>
+    row.querySelectorAll(".cell").forEach(cell => {
+      cell.innerText = "";
+      cell.className = "cell";
+    })
+  );
+
+  pickWord();
+}
+
+/* ---------- LANG CHANGE ---------- */
+langSelect.addEventListener("change", () => {
+  currentLang = langSelect.value;
+  localStorage.setItem("lang", currentLang);
+  updateLanguageUI();
+  resetGame();
+});
+
+/* ---------- GUESS LOGIC (REAL WORDLE) ---------- */
+btn.addEventListener("click", () => {
+  const guess = input.value.toUpperCase();
+  if (guess.length !== 5 || currentRow >= 5) return;
+
+  const cells = rows[currentRow].querySelectorAll(".cell");
+
+  const letterCount = {};
+  for (let l of secretWord) {
+    letterCount[l] = (letterCount[l] || 0) + 1;
+  }
+
+  // GREEN pass
+  [...guess].forEach((letter, i) => {
+    cells[i].innerText = letter;
+    if (letter === secretWord[i]) {
+      cells[i].classList.add("correct");
+      letterCount[letter]--;
+    }
+  });
+
+  // YELLOW / GRAY pass
+  [...guess].forEach((letter, i) => {
+    if (cells[i].classList.contains("correct")) return;
+
+    if (letterCount[letter] > 0) {
+      cells[i].classList.add("present");
+      letterCount[letter]--;
+    } else {
+      cells[i].classList.add("absent");
+    }
+  });
+
+  if (guess === secretWord) {
+    showPopup(
+      currentLang === "tr" ? "Tebrikler!" : "Congratulations!",
+      currentLang === "tr" ? "Kelimeyi doğru bildin!" : "You guessed the word!"
+    );
+    input.disabled = true;
+  } else if (currentRow === 4) {
+    showPopup(
+      currentLang === "tr" ? "Oyun Bitti" : "Game Over",
+      (currentLang === "tr" ? "Kelime: " : "Word: ") + secretWord
+    );
+    input.disabled = true;
+  }
+
+  currentRow++;
+  input.value = "";
+});
+
+/* INIT */
+updateLanguageUI();
+pickWord();
+	
+</script>
+</body>
+</html>

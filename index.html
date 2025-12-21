@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Advent Calendar</title>
+	<link rel="icon" type="image/png" href="images/icon_light.png">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="splash">
+		<img src="images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="cards">
+			<div class="day1 card"><a href="day1.html" class="card-link"></a></div>
+			<div class="day2 card"><a href="day2.html" class="card-link"></a></div>
+			<div class="day3 card"><a href="day3.html" class="card-link"></a></div>
+			<div class="day4 card"><a href="day4.html" class="card-link"></a></div>
+			<div class="day5 card"><a href="day5.html" class="card-link"></a></div>
+			<div class="day6 card"><a href="day6.html" class="card-link"></a></div>
+			<div class="day7 card"><a href="day7.html" class="card-link"></a></div>
+			<div class="day8 card"><a href="day8.html" class="card-link"></a></div>
+			<div class="day9 card"><a href="day9.html" class="card-link"></a></div>
+			<div class="day10 card"><a href="day10.html" class="card-link"></a></div>
+			<div class="day11 card"><a href="day11.html" class="card-link"></a></div>
+			<div class="day12 card"><a href="day12.html" class="card-link"></a></div>
+			<div class="day13 card"><a href="day13.html" class="card-link"></a></div>
+			<div class="day14 card"><a href="day14.html" class="card-link"></a></div>
+		</div>
+	</div>
+
+<script>
+	const snowLayer = document.getElementById("snow-layer");
+
+	function createSnowflake() {
+		const snowflake = document.createElement("div");
+		snowflake.className = "snowflake";
+		snowflake.innerHTML = "❄";
+
+		snowflake.style.left = Math.random() * 100 + "vw";
+		snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+		snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+		snowflake.style.opacity = Math.random();
+
+		snowLayer.appendChild(snowflake);
+
+		setTimeout(() => {
+			snowflake.remove();
+		}, 10000);
+	}
+
+	setInterval(createSnowflake, 90);
+
+	window.addEventListener("load", () => {
+	const splash = document.getElementById("splash");
+
+	setTimeout(() => {
+			splash.classList.add("hide");
+		}, 1500);
+	});
+</script>
+
+
+</body>
+</html>

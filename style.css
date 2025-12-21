@@ -1,0 +1,607 @@
+/* GENERAL STYLES */
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0f2a22;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* SPLASH SCREEN */
+
+#splash {
+  position: fixed;
+  inset: 0;
+  background: #0f2a22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  transition: opacity .8s ease, visibility .8s ease;
+  backdrop-filter: blur(6px);
+}
+
+#splash img {
+  width: 180px;
+  animation: pulse 1.5s infinite;
+}
+
+#splash p {
+  margin-top: 20px;
+  color: #fff;
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+#splash.hide {
+  transform: translateY(-100%);
+}
+
+/* SNOW LAYER */
+
+#snow-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10px;
+  color: white;
+  font-size: 12px;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.6));
+  animation: fall linear infinite;
+}
+
+/* GRID LAYOUT */
+
+.parent {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	grid-template-rows: repeat(5, 1fr);
+	gap: 10px;
+	width: 100vw;
+	height: 100vh;
+	z-index: 2;
+}
+
+.title { grid-area: 1 / 2 / 2 / 7; }
+.leftside { grid-area: 1 / 1 / 5 / 2; }
+.rightside { grid-area: 1 / 7 / 5 / 8; }
+.footer { grid-area: 5 / 1 / 6 / 8; }
+
+.title {
+  background: url("images/title_light.png") center/60% no-repeat;
+  border-radius: 12px;
+}
+
+.footer {
+  background-image: url("images/gifts_footer.png");
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: auto 80%;
+}
+
+/* CARDS GRID */
+
+.cards {
+  grid-area: 2 / 2 / 5 / 7;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.day1  { grid-area: 1 / 1 / 2 / 2; }
+.day2  { grid-area: 1 / 2 / 2 / 3; }
+.day3  { grid-area: 1 / 3 / 2 / 4; }
+.day4  { grid-area: 1 / 4 / 2 / 5; }
+.day5  { grid-area: 1 / 5 / 2 / 6; }
+
+.day6 { grid-area: 2 / 1 / 3 / 2; }
+.day7 { grid-area: 2 / 2 / 3 / 3; }
+.day8 { grid-area: 2 / 3 / 3 / 4; }
+.day9 { grid-area: 2 / 4 / 3 / 5; }
+.day10 { grid-area: 2 / 5 / 3 / 6; }
+
+.day11 { grid-area: 3 / 1 / 4 / 2; }
+.day12 { grid-area: 3 / 2 / 4 / 3; }
+.day13 { grid-area: 3 / 3 / 4 / 4; }
+.day14 { grid-area: 3 / 4 / 4 / 6; }
+
+/* CARD STYLES */
+
+.card {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 12px;
+  transition: transform .25s ease, box-shadow .25s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+
+.card-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* HOME LINK OVERLAY */
+
+.home-link{
+  position: absolute;
+  inset: 0;
+  display: block;
+  max-height: 150px;
+}
+
+/* CARD BACKGROUNDS */
+
+.day1  { background-image: url("images/01.png"); }
+.day2  { background-image: url("images/02.png"); }
+.day3  { background-image: url("images/03.png"); }
+.day4  { background-image: url("images/04.png"); }
+.day5  { background-image: url("images/05.png"); }
+.day6 { background-image: url("images/06.png"); }
+.day7 { background-image: url("images/07.png"); }
+.day8 { background-image: url("images/08.png"); }
+.day9 { background-image: url("images/09.png"); }
+.day10 { background-image: url("images/10.png"); }
+.day11 { background-image: url("images/11.png"); }
+.day12 { background-image: url("images/12.png"); }
+.day13 { background-image: url("images/13.png"); }
+.day14 { background-image: url("images/14.png"); }
+
+/* DAY 1: BELL */
+
+.bell-container { grid-area: 2 / 2 / 5 / 7; }
+
+.bell-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bell-wrapper {
+  position: relative;
+  width: 220px;
+}
+
+.bell-back,
+.bell-front {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bell-front {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+}
+
+.bell-stick {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  z-index: 2;
+  cursor: grab;
+  transform-origin: top center;
+}
+
+/* DAY 2: GIFT CATCHER */
+
+.gift-catcher-container { grid-area: 2 / 2 / 5 / 7; }
+
+.gift-catcher-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.game-wrapper {
+  flex: 3;
+}
+
+.game-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.score-area {
+  flex: 1;
+  background: rgba(0,0,0,0.25);
+  border-radius: 18px;
+  padding: 16px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-area h3 {
+  margin: 0 0 10px;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+.score-box {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.score-area .score-box img {
+	  width: 32px;
+  margin-right: 8px;
+}
+
+.score-area img{
+	width: 200px;
+  	margin-top: 20px;
+  	opacity: 0.8;
+}
+
+.gift {
+  position: absolute;
+  top: -40px;
+  font-size: 28px;
+  cursor: pointer;
+  animation: giftFall linear forwards;
+  user-select: none;
+}
+
+.bag {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: auto;
+  z-index: 5;
+  user-select: none;
+  pointer-events: none;
+}
+
+.gift-img {
+  position: absolute;
+  top: -60px;
+  z-index: 4;
+  user-select: none;
+  pointer-events: none;
+}
+
+.game-over {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.game-over.hidden {
+  display: none;
+}
+
+.game-over-card {
+  background: rgba(15, 42, 34, .95);
+  border: 1px solid rgba(255,255,255,.15);
+  padding: 18px 18px;
+  border-radius: 16px;
+  text-align: center;
+  color: #fff;
+  min-width: 220px;
+}
+
+.game-over-card h2 {
+  margin: 0 0 8px;
+  letter-spacing: 1px;
+}
+
+.game-over-card p {
+  margin: 0 0 12px;
+  opacity: 0.9;
+}
+
+.game-over-card button {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-over-card button:active {
+  transform: scale(0.98);
+}
+
+.start-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+}
+
+.start-screen.hidden {
+  display: none;
+}
+
+.start-screen button {
+  padding: 14px 22px;
+  font-size: 18px;
+  border-radius: 16px;
+  border: 0;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* DAY 3: NEW YEAR WORLDLE */
+
+.newyear-worldle { grid-area: 2 / 2 / 5 / 7; }
+
+.wordle-wrapper {
+  grid-area: 2 / 2 / 5 / 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.wordle-header {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wordle-header select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 12px;
+  padding: 8px 36px 8px 12px;
+
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, white 50%),
+    linear-gradient(135deg, white 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+
+  transition: background .2s ease, border .2s ease;
+}
+
+.wordle-header select:hover {
+  background-color: rgba(255,255,255,0.18);
+}
+
+.wordle-header select:focus {
+  border-color: #f1c40f;
+}
+
+/* OPTIONS (limited but ok) */
+.wordle-header option {
+  background: #0f2a22;
+  color: #fff;
+}
+
+#wordle-board {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.wordle-row {
+  display: flex;
+  gap: 10px;
+}
+
+.cell {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cell.correct { background: #2ecc71; }
+.cell.present { background: #f1c40f; }
+.cell.absent  { background: #555; }
+
+.wordle-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#guessInput {
+  width: 160px;
+  padding: 10px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 8px;
+}
+
+#guessBtn {
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  height: 40px;
+}
+
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-card {
+  background: rgba(15,42,34,0.95);
+  border-radius: 18px;
+  padding: 22px 26px;
+  text-align: center;
+  color: #fff;
+  min-width: 240px;
+  animation: popIn .25s ease;
+}
+
+.popup-card h2 {
+  margin: 0 0 10px;
+}
+
+.popup-card p {
+  margin: 0 0 16px;
+  opacity: 0.9;
+}
+
+.popup-card button {
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+
+/* ANIMATIONS */
+
+/* gift falling */
+@keyframes giftFall {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(120%);
+  }
+}
+
+/* splash pulse */
+@keyframes pulse {
+  0%   { transform: scale(1); opacity: .8; }
+  50%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: .8; }
+}
+
+/* snow falling */
+@keyframes fall {
+  from {
+    transform: translateY(-10px);
+  }
+  to {
+    transform: translateY(110vh);
+  }
+}
+
+/* popup pop-in */
+@keyframes popIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* RESPONSIVE STYLES */
+
+@media (max-width: 900px) {
+
+	body {
+    align-items: flex-start;
+  }
+  
+	.parent {
+		height: 100vh;
+	}
+
+	.cards {
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		grid-template-rows: auto;
+	}
+
+	.card {
+		grid-area: auto;
+	}
+
+  .bell-container {
+    max-height: 300px;
+  }
+
+	.title {
+  background: url("images/title_light_mobile.png") center/60% no-repeat;
+  border-radius: 12px;
+
+}
+	
+}
