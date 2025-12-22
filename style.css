@@ -740,7 +740,9 @@ body {
 }
 
 /* DAY 6 – EMOJI SUDOKU */
-.sudoku-container { grid-area: 2 / 2 / 5 / 7; }
+.sudoku-container {
+  grid-area: 2 / 2 / 5 / 7;
+}
 
 .sudoku-container {
   display: flex;
@@ -807,6 +809,193 @@ body {
   margin-bottom: 6px;
 }
 
+/* DAY 7 – HOT CHOCO MAKING */
+
+.hot-choco-container {
+  grid-area: 2 / 2 / 5 / 7;
+}
+
+.hot-choco-game {
+  position: relative;
+  aspect-ratio: 16/9;
+  max-height: 450px;
+  margin: auto;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+}
+
+.hot-choco-game img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* background */
+.hc-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* recipe */
+.hc-recipe {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  width: 100px;
+  z-index: 40;
+  cursor: zoom-in;
+  border-radius: 10px;
+}
+
+/* mug */
+.hc-mug {
+  position: absolute;
+  left: 50%;
+  top: 70%;
+  transform: translate(-50%, -50%);
+  width: 110px;
+  z-index: 20;
+  transition: .3s;
+}
+
+.hc-finished {
+  filter:
+    drop-shadow(0 0 18px rgba(255, 230, 150, .6)) drop-shadow(0 0 36px rgba(255, 210, 120, .4));
+}
+
+/* draggable items */
+.hc-item {
+  position: absolute;
+  width: 65px;
+  cursor: grab;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+}
+
+.hc-spoon {
+  z-index: 99999 !important;
+}
+
+.hc-item-little {
+  position: absolute;
+  width: 40px;
+  cursor: grab;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+}
+
+.hc-item-big {
+  position: absolute;
+  width: 130px;
+  cursor: grab;
+  z-index: 30;
+  transform: translate(-50%, -50%);
+}
+
+.hc-item:active {
+  cursor: grabbing;
+}
+
+.hc-disabled {
+  pointer-events: none;
+}
+
+/* retry */
+.hc-retry {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 50;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .15);
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hc-lang {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .15);
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  z-index: 9999;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.hc-lang option {
+  color: #000;
+}
+
+/* stir animation */
+.stirring {
+  animation: stir .5s ease-in-out infinite;
+}
+
+/* recipe popup */
+.recipe-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: .25s ease;
+}
+
+.recipe-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recipe-overlay img {
+  width: min(220px, 90%);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .5);
+  transform: scale(.85);
+  transition: .25s ease;
+}
+
+.recipe-overlay.active img {
+  transform: scale(1);
+}
+
+#rotateNotice {
+  position: fixed;
+  inset: 0;
+  background: #0f2a22;
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 999999;
+}
+
+#rotateNotice p {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+#rotateNotice span {
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+
 
 /* ANIMATIONS */
 
@@ -863,10 +1052,27 @@ body {
   }
 }
 
+/* hot choco stirring */
+@keyframes stir {
+  0% {
+    transform: translate(-50%, -50%) rotate(-5deg);
+  }
+
+  50% {
+    transform: translate(-50%, -50%) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(-5deg);
+  }
+}
+
 
 /* RESPONSIVE STYLES */
 
-@media (max-width: 900px) {
+
+
+@media (max-width: 900px) and (orientation: portrait) {
 
   body {
     align-items: flex-start;
@@ -915,4 +1121,119 @@ body {
     font-size: 18px;
   }
 
+  #rotateNotice {
+    display: flex;
+  }
+
+  .hot-choco-container {
+    display: none;
+  }
+
+}
+
+/* MOBİL + PORTRAIT */
+@media screen and (max-width: 900px) and (orientation: landscape) {
+  body {
+    align-items: flex-start;
+  }
+
+  .parent {
+    height: 100vh;
+  }
+
+  .title {
+    background: url("images/title_light.png") center/60% no-repeat;
+    border-radius: 12px;
+
+  }
+
+  .hc-item {
+    position: absolute;
+    width: 35px;
+    cursor: grab;
+    z-index: 30;
+    transform: translate(-50%, -50%);
+  }
+
+  .hc-item-little {
+    position: absolute;
+    width: 20px;
+    cursor: grab;
+    z-index: 30;
+    transform: translate(-50%, -50%);
+  }
+
+  .hc-item-big {
+    position: absolute;
+    width: 70px;
+    cursor: grab;
+    z-index: 30;
+    transform: translate(-50%, -50%);
+  }
+
+  .hc-recipe {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    width: 70px;
+    z-index: 40;
+    cursor: zoom-in;
+    border-radius: 10px;
+  }
+
+  .recipe-overlay img {
+    width: min(150px, 90%);
+    border-radius: 16px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, .5);
+    transform: scale(.85);
+    transition: .25s ease;
+  }
+
+  .hot-choco-game {
+    position: relative;
+    aspect-ratio: 16/9;
+    max-height: 240px;
+    margin: auto;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+  }
+
+  .hc-retry {
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    z-index: 50;
+    padding: 5px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, .15);
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .hc-lang {
+    padding: 5px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .15);
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    z-index: 9999;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+
+  .hc-mug {
+    position: absolute;
+    left: 50%;
+    top: 70%;
+    transform: translate(-50%, -50%);
+    width: 55px;
+    z-index: 20;
+    transition: .3s;
+  }
 }

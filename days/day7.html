@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Day 7 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="../images/icon_light.png">
+	<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+	<div id="splash">
+		<img src="../images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="hot-choco-container">
+			<div class="hot-choco-game" id="game">
+
+				<!-- background -->
+				<img src="../images/hot_chocolate_scene.png" class="hc-bg">
+
+				<!-- recipe -->
+				<img id="recipe" src="../images/recipe-tr.png" class="hc-recipe">
+
+				<!-- mug -->
+				<img id="mug" src="../images/mug_empty.png" class="hc-mug">
+
+				<!-- items -->
+				<img id="milk" src="../images/milk.png" class="hc-item" style="left:95%;top:65%;">
+				<img id="spoon" src="../images/spoon.png" class="hc-item hc-spoon" style="left:15%;top:85%;">
+				<img id="cocoaJar" src="../images/jar_cocoa_powder.png" class="hc-item" style="left:5%;top:65%;">
+				<img id="stirSpoon" src="../images/stir_spoon.png" class="hc-item-big" style="left:30%;top:80%;">
+				<img id="marsh" src="../images/package_mashmallow.png" class="hc-item" style="left:75%;top:64%;">
+
+				<!-- toppings -->
+				<img id="cream" src="../images/bottle_cream.png" class="hc-item-little" style="left:85%;top:65%;">
+				<img id="cinnamon" src="../images/jar_cinnamon.png" class="hc-item" style="left:15%;top:66%;">
+				<img id="chocoJar" src="../images/jar_chocolate.png" class="hc-item" style="left:25%;top:66%;">
+
+
+				<div style="display:flex; gap:8px;">
+					<button class="hc-retry" onclick="location.reload()">Retry</button>
+
+					<select id="langSelect" class="hc-lang">
+						<option value="tr">TR</option>
+						<option value="en">EN</option>
+					</select>
+				</div>
+
+				<!-- Recipe Overlay -->
+				<div id="recipeOverlay" class="recipe-overlay">
+					<img id="recipeBig" src="../images/recipe-tr.png" alt="Recipe">
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="rotateNotice">
+		<div>
+			<p>Please rotate your device</p>
+			<span>For the best experience</span>
+		</div>
+	</div>
+
+	<script>
+		const snowLayer = document.getElementById("snow-layer");
+
+		function createSnowflake() {
+			const snowflake = document.createElement("div");
+			snowflake.className = "snowflake";
+			snowflake.innerHTML = "❄";
+
+			snowflake.style.left = Math.random() * 100 + "vw";
+			snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+			snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+			snowflake.style.opacity = Math.random();
+
+			snowLayer.appendChild(snowflake);
+
+			setTimeout(() => {
+				snowflake.remove();
+			}, 10000);
+		}
+
+		setInterval(createSnowflake, 90);
+
+		window.addEventListener("load", () => {
+			const splash = document.getElementById("splash");
+
+			setTimeout(() => {
+				splash.classList.add("hide");
+			}, 1500);
+		});
+
+		/* =======================
+   STATE
+======================= */
+		const STATE = {
+			MILK: 0,
+			COCOA_JAR: 1,
+			COCOA_MUG: 2,
+			STIR_PICK: 3,
+			STIR: 4,
+			MARSH: 5,
+			TOPPING: 6,
+			DONE: 7
+		};
+
+		let state = STATE.MILK;
+		let dragging = null;
+		let offsetX = 0;
+		let offsetY = 0;
+		let spoonState = "empty";
+		let toppingUsed = false;
+
+		/* =======================
+		   ELEMENTS
+		======================= */
+		const game = document.getElementById("game");
+		const mug = document.getElementById("mug");
+
+		const milk = document.getElementById("milk");
+		const spoon = document.getElementById("spoon");
+		const cocoaJar = document.getElementById("cocoaJar");
+		const stirSpoon = document.getElementById("stirSpoon");
+		const marsh = document.getElementById("marsh");
+
+		const cream = document.getElementById("cream");
+		const cinnamon = document.getElementById("cinnamon");
+		const chocoJar = document.getElementById("chocoJar");
+
+		/* =======================
+		   INITIAL POSITIONS
+		======================= */
+		const initialPos = new Map();
+		document.querySelectorAll(".hc-item, .hc-item-big, .hc-item-little").forEach(el => {
+			initialPos.set(el.id, {
+				left: el.style.left,
+				top: el.style.top
+			});
+		});
+
+		/* =======================
+		   HELPERS
+		======================= */
+		function isOver(a, b) {
+			const r1 = a.getBoundingClientRect();
+			const r2 = b.getBoundingClientRect();
+			return !(
+				r1.right < r2.left ||
+				r1.left > r2.right ||
+				r1.bottom < r2.top ||
+				r1.top > r2.bottom
+			);
+		}
+
+		function resetPos(el) {
+			const pos = initialPos.get(el.id);
+			if (!pos) return;
+			el.style.left = pos.left;
+			el.style.top = pos.top;
+			el.style.transform = "translate(-50%, -50%)";
+		}
+
+		function disable(el) {
+			el.classList.add("hc-disabled");
+		}
+
+		function finishGame() {
+			state = STATE.DONE;
+			toppingUsed = true;
+			document.querySelectorAll(".hc-item, .hc-item-big, .hc-item-little").forEach(i => disable(i));
+			mug.classList.add("hc-finished");
+		}
+
+		/* =======================
+		   DRAG SYSTEM
+		======================= */
+		document.querySelectorAll(".hc-item, .hc-item-big, .hc-item-little").forEach(el => {
+			el.addEventListener("pointerdown", e => {
+				if (el.classList.contains("hc-disabled")) return;
+
+				dragging = el;
+				el.style.zIndex = 1000;
+
+				el.classList.add("hc-top");
+
+				// stir spoon tutulduğu anda STIR moduna geç
+				if (el === stirSpoon && state === STATE.STIR_PICK) {
+					state = STATE.STIR;
+				}
+
+
+
+				const r = el.getBoundingClientRect();
+				const g = game.getBoundingClientRect();
+
+				offsetX = e.clientX - r.left;
+				offsetY = e.clientY - r.top;
+
+				el.style.left = (r.left - g.left) + "px";
+				el.style.top = (r.top - g.top) + "px";
+				el.style.transform = "translate(0,0)";
+				el.setPointerCapture(e.pointerId);
+			});
+		});
+
+		document.addEventListener("pointermove", e => {
+			if (!dragging) return;
+
+			const g = game.getBoundingClientRect();
+			dragging.style.left = (e.clientX - g.left - offsetX) + "px";
+			dragging.style.top = (e.clientY - g.top - offsetY) + "px";
+		});
+
+		document.addEventListener("pointerup", () => {
+			if (!dragging) return;
+
+			let accepted = false;
+
+			/* =======================
+			   GAME LOGIC
+			======================= */
+
+			/* 🥛 MILK */
+			if (state === STATE.MILK && dragging === milk && isOver(milk, mug)) {
+				mug.src = "../images/mug_with_milk.png";
+				disable(milk);
+				resetPos(milk);
+				state = STATE.COCOA_JAR;
+				accepted = true;
+			}
+
+			/* 🍫 SPOON → COCOA JAR */
+			if (state === STATE.COCOA_JAR && dragging === spoon && isOver(spoon, cocoaJar)) {
+				spoon.src = "../images/spoon_cacao.png";
+				spoonState = "cocoa";
+				accepted = true;
+				state = STATE.COCOA_MUG;
+			}
+
+			/* 🍫 SPOON → MUG */
+			if (
+				state === STATE.COCOA_MUG &&
+				dragging === spoon &&
+				spoonState === "cocoa" &&
+				isOver(spoon, mug)
+			) {
+				mug.src = "../images/mug_milk_cacao.png";
+				spoon.src = "../images/spoon.png";   // temizle
+				spoonState = "empty";
+				resetPos(spoon);
+				state = STATE.STIR_PICK;
+				accepted = true;
+			}
+
+			/* 🌀 STIR PICK */
+
+
+			/* 🌀 STIR → MUG */
+			if (state === STATE.STIR && dragging === stirSpoon && isOver(stirSpoon, mug)) {
+				mug.classList.add("stirring");
+				setTimeout(() => {
+					mug.classList.remove("stirring");
+					mug.src = "../images/mug_stir.png";
+					disable(stirSpoon);
+					resetPos(stirSpoon);
+					state = STATE.MARSH;
+				}, 900);
+				accepted = true;
+			}
+
+			/* ☁️ MARSHMALLOW */
+			if (state === STATE.MARSH && dragging === marsh && isOver(marsh, mug)) {
+				mug.src = "../images/mug_marshmallows.png";
+				disable(marsh);
+				resetPos(marsh);
+				state = STATE.TOPPING;
+				accepted = true;
+			}
+
+			/* ✨ TOPPINGS */
+			if (state === STATE.TOPPING && !toppingUsed) {
+
+				if (dragging === cream && isOver(cream, mug)) {
+					mug.src = "../images/mug_cream.png";
+					disable(cream);
+					resetPos(cream);
+					accepted = true;
+					finishGame();
+				}
+
+				if (dragging === cinnamon && isOver(cinnamon, mug)) {
+					mug.src = "../images/mug_cinnamon.png";
+					disable(cinnamon);
+					resetPos(cinnamon);
+					accepted = true;
+					finishGame();
+				}
+
+				if (dragging === spoon && isOver(spoon, chocoJar)) {
+					spoon.src = "../images/spoon_chocolate.png";
+					spoonState = "chocolate";
+					accepted = true;
+				}
+
+				if (
+					dragging === spoon &&
+					spoonState === "chocolate" &&
+					isOver(spoon, mug)
+				) {
+					mug.src = "../images/mug_cacao.png";
+					spoon.src = "../images/spoon.png";
+					spoonState = "empty";
+					disable(spoon);
+					resetPos(spoon);
+					accepted = true;
+					finishGame();
+				}
+			}
+
+			/* =======================
+			   SNAP BACK
+			======================= */
+			if (!accepted) {
+				resetPos(dragging);
+			}
+
+			dragging.style.zIndex = 30; // arkada kalma bug fix
+			dragging = null;
+		});
+
+		/* =======================
+		   RECIPE POPUP + LANGUAGE
+		======================= */
+		const recipeImg = document.getElementById("recipe");
+		const recipeOverlay = document.getElementById("recipeOverlay");
+		const recipeBig = document.getElementById("recipeBig");
+		const langSelect = document.getElementById("langSelect");
+
+		let currentLang = "tr";
+
+		function updateRecipe() {
+			const src =
+				currentLang === "en"
+					? "../images/recipe-en.png"
+					: "../images/recipe-tr.png";
+			recipeImg.src = src;
+			recipeBig.src = src;
+		}
+
+		recipeImg.addEventListener("click", () => {
+			recipeOverlay.classList.add("active");
+		});
+
+		recipeOverlay.addEventListener("click", () => {
+			recipeOverlay.classList.remove("active");
+		});
+
+		langSelect.addEventListener("change", e => {
+			currentLang = e.target.value;
+			updateRecipe();
+		});
+
+		updateRecipe();
+
+	</script>
+</body>
+
+</html>
