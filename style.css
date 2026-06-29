@@ -995,6 +995,481 @@ body {
   font-size: 14px;
 }
 
+/* DAY 8 – SNOWBALL SHOT */
+
+.snowball-game-container {
+  grid-area: 2 / 2 / 5 / 7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.snowball-wrapper {
+  width: 100%;
+  max-width: 980px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.snowball-hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 10px 12px;
+  border-radius: 16px;
+  color: #fff;
+}
+
+.hud-left {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hud-pill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.hud-right {
+  display: flex;
+  gap: 10px;
+}
+
+.hud-btn {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hud-btn:active {
+  transform: scale(0.98);
+}
+
+.hud-btn.secondary {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.snowball-stage {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .35);
+}
+
+.sb-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  filter: saturate(1.05);
+}
+
+.sb-crosshair {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.sb-crosshair::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 2px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translate(-50%, -50%);
+}
+
+.sb-crosshair::before {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 18px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translate(-50%, -50%);
+}
+
+.sb-shooter {
+  position: absolute;
+  left: 10%;
+  bottom: 8%;
+  width: 70px;
+  opacity: 0.9;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
+  z-index: 10;
+}
+
+.sb-target {
+  position: absolute;
+  z-index: 30;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,.35));
+}
+
+.sb-ball {
+  position: absolute;
+  width: 26px;
+  transform: translate(-50%, -50%);
+  z-index: 25;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 8px 14px rgba(0,0,0,.35));
+}
+
+.sb-explosion {
+  position: absolute;
+  width: 150px;
+  transform: translate(-50%, -50%) scale(0.9);
+  z-index: 40;
+  pointer-events: none;
+  animation: sbPop .38s ease forwards;
+  filter: drop-shadow(0 12px 20px rgba(0,0,0,.35));
+}
+
+.sb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+}
+
+.sb-overlay.hidden {
+  display: none;
+}
+
+.sb-overlay-card {
+  background: rgba(15, 42, 34, 0.95);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+  padding: 20px 22px;
+  text-align: center;
+  color: #fff;
+  width: min(360px, 92%);
+}
+
+.sb-overlay-card .muted {
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+.snowball-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0.95;
+}
+
+.legend-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.legend-item img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.snowball-wrapper.three-col {
+  display: grid;
+  grid-template-columns: 3fr 0.1fr 0.2fr;
+  gap: 16px;
+  height: 100%;
+}
+
+/* GAME */
+.snowball-game {
+  display: flex;
+}
+
+/* LEGEND COLUMN */
+.snowball-legend-col {
+  display: flex;
+}
+
+.snowball-legend {
+  display: flex;
+  flex-direction: column;   /* ALT ALTA */
+  gap: 12px;
+}
+
+/* HUD COLUMN */
+.snowball-hud-col {
+  display: flex;
+}
+
+.snowball-hud {
+  display: flex;
+  flex-direction: column;   /* ALT ALTA */
+  gap: 12px;
+}
+
+.sb-big-ball {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 90px;          /* büyük ve net */
+  transform: translateX(-50%);
+  z-index: 20;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 22px rgba(0,0,0,.45));
+}
+
+/* DAY 9 CROSSWORD */
+
+.crossword-container {
+  grid-area: 2 / 2 / 3 / 7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;          /* ❗ kritik */
+  min-height: 0;         /* ❗ flex overflow fix */
+}
+
+.cw-left {
+  flex: 1.15;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cw-right {
+  flex: 0.85;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 12px;
+  overflow: auto;
+}
+
+.cw-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cw-header h2 {
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.cw-header select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 8px 36px 8px 12px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, white 50%),
+    linear-gradient(135deg, white 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.cw-header option {
+  background: #0f2a22;
+  color: #fff;
+}
+
+.cw-status {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cw-pill {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.cw-grid {
+  width: 100%;
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.cw-cell {
+  position: relative;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
+  transition: transform .12s ease;
+  min-height: 34px;
+}
+
+.cw-cell:active { transform: scale(0.98); }
+
+.cw-cell.black {
+  background: rgba(0, 0, 0, 0.45);
+  cursor: default;
+}
+
+.cw-num {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 10px;
+  opacity: 0.85;
+  font-weight: 900;
+}
+
+.cw-letter {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.cw-cell.in-word {
+  outline: 2px solid rgba(241, 196, 15, 0.75);
+}
+
+.cw-cell.active {
+  outline: 3px solid rgba(241, 196, 15, 1);
+  box-shadow: 0 0 0 6px rgba(241, 196, 15, 0.12);
+}
+
+.cw-cell.correct { background: rgba(46, 204, 113, 0.75); }
+.cw-cell.wrong { background: rgba(231, 76, 60, 0.55); }
+
+.cw-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cw-btn {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cw-btn:active { transform: scale(0.98); }
+
+.cw-btn.secondary {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.cw-note {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 13px;
+}
+
+.cw-clues {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.cw-clue-col h3 {
+  margin: 0 0 6px;
+  letter-spacing: 0.6px;
+}
+
+.cw-clue-col ol {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cw-clue {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cw-clue:hover { background: rgba(255, 255, 255, 0.14); }
+.cw-clue.active { outline: 2px solid rgba(241, 196, 15, 1); }
+.cw-clue.done { opacity: 0.75; text-decoration: line-through; }
+
+.cw-clue-num { font-weight: 900; }
+
+@keyframes cwShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+.cw-cell.shake { animation: cwShake .22s ease; }
+
+@media (max-width: 900px) {
+  .crossword-container { flex-direction: column; }
+  .cw-cell { min-height: 30px; }
+}
 
 
 /* ANIMATIONS */
@@ -1067,6 +1542,11 @@ body {
   }
 }
 
+/* snowball pop */
+@keyframes sbPop {
+  from { opacity: 0.0; transform: translate(-50%, -50%) scale(0.65); }
+  to   { opacity: 1;   transform: translate(-50%, -50%) scale(1.05); }
+}
 
 /* RESPONSIVE STYLES */
 
@@ -1076,6 +1556,10 @@ body {
 
   body {
     align-items: flex-start;
+  }
+
+  .home-page .parent {
+    height: 200vh;
   }
 
   .parent {
@@ -1236,4 +1720,77 @@ body {
     z-index: 20;
     transition: .3s;
   }
+
+  .gift-catcher-container {
+    gap: 5px;
+  }
+
+  .game-area {
+    min-height: 200px;
+  }
+
+
+  .score-area img {
+  width: 100px;
+  margin-top: 0px;
+}
+
+.bag{
+  width: 80px;
+}
+
+.score-box {
+  font-size: 20px;
+}
+
+.home-link {
+  max-height: 80px;
+}
+
+.snowball-wrapper.three-col {
+    grid-template-columns: 2.8fr 0.6fr 0.6fr;
+    gap: 8px;
+  }
+
+  .snowball-hud,
+  .snowball-legend {
+    min-width: 0;        /* 🔥 kritik */
+    padding: 6px;
+  }
+
+  .hud-pill {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+
+  .hud-btn {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+
+  .legend-item img {
+    width: 22px;
+    height: auto;
+  }
+.snowball-stage {
+    height: 100%;
+    min-height: unset;
+    max-height: unset;
+
+    aspect-ratio: 16 / 9;   /* 🔥 KAREYİ BİTİREN SATIR */
+  }
+
+  .sb-big-ball {
+    width: 60px;
+    bottom: 3%;
+  }
+
+  .sb-target {
+    transform: scale(0.7);
+  }
+
+  .sb-explosion {
+    width: 100px;
+  }
+
 }

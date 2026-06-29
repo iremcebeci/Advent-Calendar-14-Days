@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Day 9 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="../images/icon_light.png" />
+	<link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+	<div id="splash">
+		<img src="../images/icon_light.png" alt="Loading" />
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
+		<div class="leftside"></div>
+		<div class="rightside"></div>
+		<div class="footer"></div>
+
+		<div class="crossword-container">
+			<div class="cw-left">
+				<div class="cw-header">
+					<h2 id="cwTitle">Christmas Crossword</h2>
+					<select id="cwLang">
+						<option value="en">EN</option>
+						<option value="tr">TR</option>
+					</select>
+				</div>
+
+				<div class="cw-status">
+					<div class="cw-pill"><span id="cwDir">ACROSS</span> · <span id="cwNum">-</span></div>
+					<div class="cw-pill" id="cwHint">Click a cell to start ✨</div>
+				</div>
+
+				<div id="cwGrid" class="cw-grid" aria-label="Crossword grid"></div>
+
+				<div class="cw-actions">
+					<button class="cw-btn secondary" id="cwClearWord">Clear Word</button>
+					<button class="cw-btn" id="cwCheckWord">Check (Enter)</button>
+					<button class="cw-btn secondary" id="cwReset">Reset</button>
+				</div>
+
+				<p class="cw-note" id="cwNote"></p>
+		</div>
+		</div>
+	</div>
+
+	<!-- Popup (Wordle’daki popup style’ını reuse) -->
+	<div id="cwPopup" class="popup hidden">
+		<div class="popup-card">
+			<h2 id="cwPopupTitle"></h2>
+			<p id="cwPopupText"></p>
+			<button id="cwPopupBtn">OK</button>
+		</div>
+	</div>
+
+	<script>
+		/* ---------------- SNOW + SPLASH ---------------- */
+		const snowLayer = document.getElementById("snow-layer");
+
+		function createSnowflake() {
+			const snowflake = document.createElement("div");
+			snowflake.className = "snowflake";
+			snowflake.innerHTML = "❄";
+			snowflake.style.left = Math.random() * 100 + "vw";
+			snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+			snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+			snowflake.style.opacity = Math.random();
+			snowLayer.appendChild(snowflake);
+			setTimeout(() => snowflake.remove(), 10000);
+		}
+		setInterval(createSnowflake, 90);
+
+		window.addEventListener("load", () => {
+			const splash = document.getElementById("splash");
+			setTimeout(() => splash.classList.add("hide"), 1500);
+		});
+
+		/* =========================
+		   ORGANIC CROSSWORD ENGINE
+		   ========================= */
+
+		/* ---- PUZZLES (organic: words define the grid) ----
+		   row/col are "puzzle coordinates" (not fixed size grid).
+		   We'll auto-compute bounds + trim.
+		*/
+
+		const PUZZLES = {
+			en: {
+				title: "Christmas Crossword",
+				words: [
+					// Across
+					{ id: "A1", dir: "across", row: 3, col: 2, answer: "SANTA", clue: "He delivers gifts 🎅" },
+					{ id: "A2", dir: "across", row: 5, col: 0, answer: "SNOW", clue: "Winter confetti" },
+					{ id: "A3", dir: "across", row: 7, col: 3, answer: "TREE", clue: "It gets decorated with lights" },
+					{ id: "A4", dir: "across", row: 9, col: 1, answer: "GIFTS", clue: "Wrapped surprises" },
+					{ id: "A5", dir: "across", row: 11, col: 4, answer: "BELLS", clue: "They ring 🔔" },
+
+					// Down (intersecting on purpose)
+					{ id: "D1", dir: "down", row: 1, col: 4, answer: "NORTH", clue: "Where Santa lives (direction)" },      // crosses SANTA at N? (SANTA has N? no) wait intersects at row3 col4 = N? row3 col2..6 => S A N T A, yes N at col4
+					{ id: "D2", dir: "down", row: 3, col: 2, answer: "SPARK", clue: "Tiny shine / twinkle (short vibe)" },  // crosses SANTA at S (row3 col2)
+					{ id: "D3", dir: "down", row: 7, col: 5, answer: "EVE", clue: "The night before the big day" },         // crosses TREE at E (row7 col5)
+					{ id: "D4", dir: "down", row: 9, col: 3, answer: "FEST", clue: "A celebration" },                        // crosses GIFTS at F? (GIFTS row9 col1..5 => G I F T S, F at col3)
+					{ id: "D5", dir: "down", row: 11, col: 7, answer: "SING", clue: "What people do with carols" }          // crosses BELLS at S? BELLS row11 col4..8 => B E L L S, S at col8 not 7. but okay as standalone
+				],
+				ui: {
+					across: "Across",
+					down: "Down",
+					dirAcross: "ACROSS",
+					dirDown: "DOWN",
+					hintIdle: "Click a cell to start ✨",
+					btnCheck: "Check (Enter)",
+					btnClear: "Clear Word",
+					btnReset: "Reset",
+					ok: "OK",
+					successTitle: "Congratulations!",
+					successText: "You completed the crossword 🎄",
+					note: "Tip: Click the same cell again to switch Across/Down."
+				}
+			},
+
+			tr: {
+				title: "Yılbaşı Kelime Bulmaca",
+				words: [
+					// Yatay
+					{ id: "A1", dir: "across", row: 4, col: 2, answer: "HEDİYE", clue: "Paketli sürpriz 🎁" },
+					{ id: "A2", dir: "across", row: 6, col: 0, answer: "KAR", clue: "Kışın story bahanesi ❄️" },
+					{ id: "A3", dir: "across", row: 8, col: 3, answer: "KAZAK", clue: "Kışın oversized olmazsa olmaz" },
+					{ id: "A4", dir: "across", row: 10, col: 1, answer: "NOEL", clue: "25 Aralık vibe’ı" },
+					{ id: "A5", dir: "across", row: 12, col: 4, answer: "ÇAN", clue: "Duyunca Noel Baba geliyor sanarsın 🔔" },
+
+					// Dikey (kesişimli)
+					{ id: "D1", dir: "down", row: 2, col: 4, answer: "DİLEK", clue: "Yeni yılda en çok edilen şey" },      // HEDİYE ile D harfinde kesişir (H E D İ Y E)
+					{ id: "D2", dir: "down", row: 4, col: 6, answer: "YILDIZ", clue: "Gece gökyüzünün şovu ✨" },           // HEDİYE ile Y’de kesişir (col6)
+					{ id: "D3", dir: "down", row: 8, col: 5, answer: "AKŞAM", clue: "Yılbaşı ___ yemeği (zaman)" },        // KAZAK ile A’da kesişir (K A Z A K)
+					{ id: "D4", dir: "down", row: 10, col: 3, answer: "EL", clue: "Hediyeyi açarken ilk kullanılan şey 😄" }, // NOEL ile E’de kesişir (N O E L)
+					{ id: "D5", dir: "down", row: 12, col: 6, answer: "AN", clue: "Kutlama ___’ı (çok kısa ama tadında)" } // ÇAN ile A/N çakışma ihtimali var; çan row12 col4..6 => Ç A N, col6 = N, burada D5 başlıyor N ister; 'AN' baş harfi A olur. Bu yüzden aşağıda düzeltme:
+				],
+				ui: {
+					across: "Yatay",
+					down: "Dikey",
+					dirAcross: "YATAY",
+					dirDown: "DİKEY",
+					hintIdle: "Başlamak için bir kutuya tıkla ✨",
+					btnCheck: "Kontrol (Enter)",
+					btnClear: "Kelimeyi Sil",
+					btnReset: "Sıfırla",
+					ok: "Tamam",
+					successTitle: "Tebrikler!",
+					successText: "Bulmacayı çözdün 🎄",
+					note: "Tüy o: Aynı kutuya tekrar tıklarsan Yatay/Dikey değişir."
+				}
+			}
+		};
+
+		// TR puzzle'daki D5'i çakışmasız hale getirelim: ÇAN'ın N harfine "NAR" dikey koyacağız.
+		// ÇAN: row12 col4..6 => Ç (4) A(5) N(6). Dikey NAR -> N (row12 col6), A (row13 col6), R (row14 col6)
+		PUZZLES.tr.words = PUZZLES.tr.words.filter(w => w.id !== "D5");
+		PUZZLES.tr.words.push({ id: "D5", dir: "down", row: 12, col: 6, answer: "NAR", clue: "Yılbaşında çat diye kırılır" });
+
+		/* ---------------- DOM ---------------- */
+		const gridEl = document.getElementById("cwGrid");
+		const langEl = document.getElementById("cwLang");
+		const titleEl = document.getElementById("cwTitle");
+
+		const dirEl = document.getElementById("cwDir");
+		const numEl = document.getElementById("cwNum");
+		const hintEl = document.getElementById("cwHint");
+
+		const acrossTitleEl = document.getElementById("cwAcrossTitle");
+		const downTitleEl = document.getElementById("cwDownTitle");
+		const acrossListEl = document.getElementById("cwAcrossList");
+		const downListEl = document.getElementById("cwDownList");
+
+		const btnCheck = document.getElementById("cwCheckWord");
+		const btnClear = document.getElementById("cwClearWord");
+		const btnReset = document.getElementById("cwReset");
+		const noteEl = document.getElementById("cwNote");
+
+		const popup = document.getElementById("cwPopup");
+		const popupTitle = document.getElementById("cwPopupTitle");
+		const popupText = document.getElementById("cwPopupText");
+		const popupBtn = document.getElementById("cwPopupBtn");
+
+		/* ---------------- STATE ---------------- */
+		let lang = localStorage.getItem("cw_lang") || "en";
+		let puzzle = null;
+
+		// grid matrix of { ch?: string, starts?: number }
+		let matrix = [];
+		let rows = 0, cols = 0;
+
+		// maps for fast lookup
+		let cellToWords = new Map();  // "r,c" -> {across?: word, down?: word}
+		let wordNum = new Map();      // word.id -> number
+		let values = new Map();       // "r,c" -> typed letter
+		let locked = new Set();       // word.id locked when correct
+
+		// active
+		let activeDir = "across"; // across | down
+		let activeWord = null;
+		let activeIndex = 0;
+
+		/* ---------------- HELPERS ---------------- */
+		function kCell(r, c) { return `${r},${c}`; }
+
+		function normalizeChar(ch) {
+			if (!ch || ch.length !== 1) return "";
+			let up = (lang === "tr") ? ch.toLocaleUpperCase("tr-TR") : ch.toUpperCase();
+
+			if (lang === "tr") {
+				const ok = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ";
+				return ok.includes(up) ? up : "";
+			}
+			return /^[A-Z]$/.test(up) ? up : "";
+		}
+
+		function showPopup(t, x) {
+			popupTitle.innerText = t;
+			popupText.innerText = x;
+			popup.classList.remove("hidden");
+		}
+		popupBtn.addEventListener("click", () => popup.classList.add("hidden"));
+
+		function getWordCells(w) {
+			const out = [];
+			const ans = (lang === "tr") ? w.answer.toLocaleUpperCase("tr-TR") : w.answer.toUpperCase();
+			for (let i = 0; i < ans.length; i++) {
+				const r = w.dir === "across" ? w.row : w.row + i;
+				const c = w.dir === "across" ? w.col + i : w.col;
+				out.push({ r, c, i, ch: ans[i] });
+			}
+			return out;
+		}
+
+		function computeBounds(words) {
+			let minR = Infinity, minC = Infinity, maxR = -Infinity, maxC = -Infinity;
+
+			words.forEach(w => {
+				const len = w.answer.length;
+				const r2 = w.dir === "across" ? w.row : w.row + len - 1;
+				const c2 = w.dir === "across" ? w.col + len - 1 : w.col;
+
+				minR = Math.min(minR, w.row);
+				minC = Math.min(minC, w.col);
+				maxR = Math.max(maxR, r2);
+				maxC = Math.max(maxC, c2);
+			});
+
+			if (!isFinite(minR)) return { minR: 0, minC: 0, maxR: 0, maxC: 0 };
+
+			// add padding for organic breathing space
+			minR -= 1; minC -= 1; maxR += 1; maxC += 1;
+
+			return { minR, minC, maxR, maxC };
+		}
+
+		function shiftWords(words, dr, dc) {
+			return words.map(w => ({ ...w, row: w.row + dr, col: w.col + dc }));
+		}
+
+		function buildMatrix(words) {
+			const b = computeBounds(words);
+			const dr = -b.minR;
+			const dc = -b.minC;
+
+			const shifted = shiftWords(words, dr, dc);
+
+			const b2 = computeBounds(shifted);
+			rows = b2.maxR - b2.minR + 1;
+			cols = b2.maxC - b2.minC + 1;
+
+			// build empty
+			matrix = Array.from({ length: rows }, () => Array.from({ length: cols }, () => ({ black: true, num: 0 })));
+			cellToWords = new Map();
+
+			// place letters (and detect conflicts)
+			for (const w of shifted) {
+				const cells = getWordCells(w);
+				for (const p of cells) {
+					const cell = matrix[p.r][p.c];
+					if (cell.black) {
+						cell.black = false;
+						cell.solution = p.ch;
+					} else {
+						// conflict check
+						if (cell.solution && cell.solution !== p.ch) {
+							console.warn("Crossword conflict at", p.r, p.c, "existing:", cell.solution, "new:", p.ch, "word:", w);
+						}
+					}
+
+					const key = kCell(p.r, p.c);
+					const cur = cellToWords.get(key) || {};
+					cur[w.dir] = w;
+					cellToWords.set(key, cur);
+				}
+			}
+
+			// number starts (crossword rule)
+			let num = 1;
+			wordNum = new Map();
+			const byStart = new Map(); // "dir:r,c" -> num
+
+			function isBlack(r, c) {
+				if (r < 0 || c < 0 || r >= rows || c >= cols) return true;
+				return matrix[r][c].black;
+			}
+
+			// precompute word start cells after shift:
+			for (const w of shifted) {
+				const startKey = `${w.dir}:${w.row},${w.col}`;
+				// number will be assigned by scanning cells (so same start shared across dir -> same num)
+				byStart.set(startKey, 0);
+			}
+
+			for (let r = 0; r < rows; r++) {
+				for (let c = 0; c < cols; c++) {
+					if (matrix[r][c].black) continue;
+
+					const startsAcross = isBlack(r, c - 1) && !isBlack(r, c + 1);
+					const startsDown = isBlack(r - 1, c) && !isBlack(r + 1, c);
+
+					if (startsAcross || startsDown) {
+						matrix[r][c].num = num;
+
+						// bind number to words that start here
+						const keyA = `across:${r},${c}`;
+						const keyD = `down:${r},${c}`;
+						if (byStart.has(keyA)) byStart.set(keyA, num);
+						if (byStart.has(keyD)) byStart.set(keyD, num);
+
+						num++;
+					}
+				}
+			}
+
+			// write numbers to words
+			shifted.forEach(w => {
+				const n = byStart.get(`${w.dir}:${w.row},${w.col}`) || 0;
+				wordNum.set(w.id, n);
+			});
+
+			// keep shifted words back into puzzle runtime
+			return shifted;
+		}
+
+		function setCellValue(r, c, ch) {
+			const key = kCell(r, c);
+			if (!ch) values.delete(key);
+			else values.set(key, ch);
+
+			const el = gridEl.querySelector(`.cw-cell[data-r="${r}"][data-c="${c}"]`);
+			if (el) {
+				const t = el.querySelector(".cw-letter");
+				if (t) t.innerText = ch || "";
+			}
+		}
+
+		function getCellValue(r, c) {
+			return values.get(kCell(r, c)) || "";
+		}
+
+		function clearHighlights() {
+			gridEl.querySelectorAll(".cw-cell").forEach(el => el.classList.remove("active", "in-word"));
+			gridEl.querySelectorAll(".cw-clue").forEach(el => el.classList.remove("active"));
+		}
+
+		function highlightWord(w, dir) {
+			clearHighlights();
+			if (!w) return;
+
+			const cells = getWordCells(w);
+			cells.forEach(({ r, c }) => {
+				const el = gridEl.querySelector(`.cw-cell[data-r="${r}"][data-c="${c}"]`);
+				if (el) el.classList.add("in-word");
+			});
+
+			const ac = cells[activeIndex];
+			if (ac) {
+				const el = gridEl.querySelector(`.cw-cell[data-r="${ac.r}"][data-c="${ac.c}"]`);
+				if (el) el.classList.add("active");
+			}
+
+			const clueEl = document.querySelector(`.cw-clue[data-id="${w.id}"]`);
+			if (clueEl) clueEl.classList.add("active");
+
+			dirEl.innerText = (dir === "across") ? puzzle.ui.dirAcross : puzzle.ui.dirDown;
+			numEl.innerText = wordNum.get(w.id) || "-";
+			hintEl.innerText = w.clue;
+		}
+
+		function wordString(w) {
+			const cells = getWordCells(w);
+			return cells.map(p => getCellValue(p.r, p.c)).join("");
+		}
+
+		function checkWord(w) {
+			if (!w) return false;
+			if (locked.has(w.id)) return true;
+
+			const target = (lang === "tr") ? w.answer.toLocaleUpperCase("tr-TR") : w.answer.toUpperCase();
+			const guess = wordString(w);
+
+			// must be fully filled
+			if (guess.length !== target.length || [...guess].some(ch => !ch)) return false;
+
+			const ok = guess === target;
+
+			// paint cells
+			const cells = getWordCells(w);
+			cells.forEach(({ r, c }) => {
+				const el = gridEl.querySelector(`.cw-cell[data-r="${r}"][data-c="${c}"]`);
+				if (!el) return;
+				el.classList.remove("wrong", "correct");
+				el.classList.add(ok ? "correct" : "wrong");
+			});
+
+			if (!ok) {
+				cells.forEach(({ r, c }) => {
+					const el = gridEl.querySelector(`.cw-cell[data-r="${r}"][data-c="${c}"]`);
+					if (!el) return;
+					el.classList.add("shake");
+					setTimeout(() => el.classList.remove("shake"), 220);
+				});
+				return false;
+			}
+
+			locked.add(w.id);
+			renderClues(puzzleWordsRuntime);
+			return true;
+		}
+
+		function checkAllDone(words) {
+			return words.every(w => locked.has(w.id));
+		}
+
+		function clearWord(w) {
+			if (!w) return;
+			if (locked.has(w.id)) return;
+
+			const cells = getWordCells(w);
+			cells.forEach(({ r, c }) => {
+				setCellValue(r, c, "");
+				const el = gridEl.querySelector(`.cw-cell[data-r="${r}"][data-c="${c}"]`);
+				if (el) el.classList.remove("wrong", "correct");
+			});
+		}
+
+		function setActiveFromCell(r, c) {
+			const key = kCell(r, c);
+			const cand = cellToWords.get(key);
+			if (!cand) return;
+
+			// toggle direction if same cell clicked
+			const prevCell = activeWord ? getWordCells(activeWord)[activeIndex] : null;
+			const sameCell = prevCell && prevCell.r === r && prevCell.c === c;
+
+			if (sameCell) {
+				activeDir = (activeDir === "across") ? "down" : "across";
+			}
+
+			let w = cand[activeDir];
+			if (!w) {
+				activeDir = (activeDir === "across") ? "down" : "across";
+				w = cand[activeDir];
+			}
+			if (!w) return;
+
+			activeWord = w;
+
+			const cells = getWordCells(w);
+			const idx = cells.findIndex(p => p.r === r && p.c === c);
+			activeIndex = Math.max(0, idx);
+
+			highlightWord(activeWord, activeDir);
+		}
+
+		function renderGrid() {
+			gridEl.innerHTML = "";
+
+			gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+			// auto cell size based on container width/cols
+			gridEl.style.setProperty("--cw-cols", cols);
+
+			for (let r = 0; r < rows; r++) {
+				for (let c = 0; c < cols; c++) {
+					const cell = matrix[r][c];
+					const div = document.createElement("div");
+					div.className = "cw-cell";
+					div.dataset.r = r;
+					div.dataset.c = c;
+
+					if (cell.black) {
+						div.classList.add("black");
+						gridEl.appendChild(div);
+						continue;
+					}
+
+					if (cell.num) {
+						const badge = document.createElement("div");
+						badge.className = "cw-num";
+						badge.innerText = cell.num;
+						div.appendChild(badge);
+					}
+
+					const letter = document.createElement("div");
+					letter.className = "cw-letter";
+					letter.innerText = getCellValue(r, c);
+					div.appendChild(letter);
+
+					div.addEventListener("click", () => setActiveFromCell(r, c));
+
+					gridEl.appendChild(div);
+				}
+			}
+		}
+
+		function renderClues(words) {
+			acrossTitleEl.innerText = puzzle.ui.across;
+			downTitleEl.innerText = puzzle.ui.down;
+
+			const across = words.filter(w => w.dir === "across").sort((a, b) => (wordNum.get(a.id) || 0) - (wordNum.get(b.id) || 0));
+			const down = words.filter(w => w.dir === "down").sort((a, b) => (wordNum.get(a.id) || 0) - (wordNum.get(b.id) || 0));
+
+			const mkLi = (w) => {
+				const li = document.createElement("li");
+				li.className = "cw-clue";
+				li.dataset.id = w.id;
+
+				const n = wordNum.get(w.id) || "";
+				li.innerHTML = `<span class="cw-clue-num">${n}.</span> <span class="cw-clue-text">${w.clue}</span>`;
+
+				if (locked.has(w.id)) li.classList.add("done");
+
+				li.addEventListener("click", () => {
+					activeDir = w.dir;
+					activeWord = w;
+					activeIndex = 0;
+					highlightWord(activeWord, activeDir);
+					li.scrollIntoView({ block: "nearest", behavior: "smooth" });
+				});
+
+				return li;
+			};
+
+			acrossListEl.innerHTML = "";
+			downListEl.innerHTML = "";
+			across.forEach(w => acrossListEl.appendChild(mkLi(w)));
+			down.forEach(w => downListEl.appendChild(mkLi(w)));
+		}
+
+		function updateUITexts() {
+			titleEl.innerText = puzzle.title;
+			btnCheck.innerText = puzzle.ui.btnCheck;
+			btnClear.innerText = puzzle.ui.btnClear;
+			btnReset.innerText = puzzle.ui.btnReset;
+			popupBtn.innerText = puzzle.ui.ok;
+			noteEl.innerText = puzzle.ui.note;
+
+			if (!activeWord) {
+				dirEl.innerText = puzzle.ui.dirAcross;
+				numEl.innerText = "-";
+				hintEl.innerText = puzzle.ui.hintIdle;
+			}
+		}
+
+		/* ---------------- KEYBOARD ---------------- */
+		document.addEventListener("keydown", (e) => {
+			if (!popup.classList.contains("hidden")) return;
+			if (!activeWord) return;
+			if (locked.has(activeWord.id)) return;
+
+			// Arrow navigation within active word
+			if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+				e.preventDefault();
+				const cells = getWordCells(activeWord);
+
+				if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+					activeIndex = Math.max(0, activeIndex - 1);
+				} else {
+					activeIndex = Math.min(cells.length - 1, activeIndex + 1);
+				}
+				highlightWord(activeWord, activeDir);
+				return;
+			}
+
+			if (e.key === "Enter") {
+				e.preventDefault();
+				const ok = checkWord(activeWord);
+				if (ok && checkAllDone(puzzleWordsRuntime)) {
+					showPopup(puzzle.ui.successTitle, puzzle.ui.successText);
+				}
+				return;
+			}
+
+			if (e.key === "Backspace") {
+				e.preventDefault();
+				const cells = getWordCells(activeWord);
+				const cur = cells[activeIndex];
+				if (!cur) return;
+
+				const curVal = getCellValue(cur.r, cur.c);
+				if (curVal) {
+					setCellValue(cur.r, cur.c, "");
+				} else {
+					activeIndex = Math.max(0, activeIndex - 1);
+					const prev = cells[activeIndex];
+					if (prev) setCellValue(prev.r, prev.c, "");
+				}
+				highlightWord(activeWord, activeDir);
+				return;
+			}
+
+			const ch = normalizeChar(e.key);
+			if (!ch) return;
+
+			e.preventDefault();
+			const cells = getWordCells(activeWord);
+			const cur = cells[activeIndex];
+			if (!cur) return;
+
+			setCellValue(cur.r, cur.c, ch);
+			activeIndex = Math.min(cells.length - 1, activeIndex + 1);
+			highlightWord(activeWord, activeDir);
+		});
+
+		/* ---------------- BUTTONS ---------------- */
+		btnCheck.addEventListener("click", () => {
+			if (!activeWord) return;
+			const ok = checkWord(activeWord);
+			if (ok && checkAllDone(puzzleWordsRuntime)) {
+				showPopup(puzzle.ui.successTitle, puzzle.ui.successText);
+			}
+		});
+
+		btnClear.addEventListener("click", () => {
+			if (!activeWord) return;
+			clearWord(activeWord);
+			highlightWord(activeWord, activeDir);
+		});
+
+		btnReset.addEventListener("click", () => {
+			initLang(lang); // full reset
+		});
+
+		/* ---------------- INIT ---------------- */
+		let puzzleWordsRuntime = [];
+
+		function initLang(newLang) {
+			lang = newLang;
+			localStorage.setItem("cw_lang", lang);
+
+			puzzle = PUZZLES[lang];
+			locked = new Set();
+			values = new Map();
+			activeDir = "across";
+			activeWord = null;
+			activeIndex = 0;
+
+			// build organic matrix + shifted word coords
+			puzzleWordsRuntime = buildMatrix(puzzle.words);
+
+			renderGrid();
+			renderClues(puzzleWordsRuntime);
+			updateUITexts();
+			clearHighlights();
+		}
+
+		langEl.value = lang;
+		langEl.addEventListener("change", () => initLang(langEl.value));
+
+		initLang(lang);
+	</script>
+</body>
+
+</html>

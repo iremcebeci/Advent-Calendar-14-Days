@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Day 8 | Advent Calendar</title>
+	<link rel="icon" type="image/png" href="../images/icon_light.png">
+	<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+	<div id="splash">
+		<img src="../images/icon_light.png" alt="Loading">
+		<p>Preparing the gifts...</p>
+	</div>
+
+	<div id="snow-layer"></div>
+
+	<div class="parent">
+		<div class="title"><a href="../index.html" class="home-link"></a></div>
+		<div class="leftside"> </div>
+		<div class="rightside"> </div>
+		<div class="footer"> </div>
+		<div class="snowball-game-container">
+			<div class="snowball-wrapper three-col">
+				<div class="snowball-game">
+					<div class="snowball-stage" id="sbStage">
+						<img class="sb-bg" src="../images/snowball_scene.jpg" alt="bg">
+						<div class="sb-crosshair" id="sbCrosshair"></div>
+
+						<img src="../images/snowball.png" class="sb-big-ball" alt="shooter" />
+					</div>
+				</div>
+				<div class="snowball-legend-col">
+					<div class="snowball-legend">
+						<div class="legend-item">
+							<img src="../images/target.png">
+						</div>
+						<div class="legend-item">
+							<img src="../images/target2.png">
+						</div>
+						<div class="legend-item">
+							<img src="../images/target3.png">
+						</div>
+					</div>
+				</div>
+				<div class="snowball-hud-col">
+					<div class="snowball-hud">
+						<div class="hud-pill">Score: <span id="sbScore">0</span></div>
+						<div class="hud-pill">Time: <span id="sbTime">30</span>s</div>
+						<div class="hud-pill">Streak: <span id="sbStreak">0</span></div>
+
+						<button id="startBtn" class="hud-btn">Start</button>
+						<button id="restartBtn" class="hud-btn secondary">Restart</button>
+
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<div id="rotateNotice">
+		<div>
+			<p>Please rotate your device</p>
+			<span>For the best experience</span>
+		</div>
+	</div>
+
+	<script>
+		/* ---------------- SNOW ---------------- */
+		const snowLayer = document.getElementById("snow-layer");
+
+		function createSnowflake() {
+			const snowflake = document.createElement("div");
+			snowflake.className = "snowflake";
+			snowflake.innerHTML = "❄";
+
+			snowflake.style.left = Math.random() * 100 + "vw";
+			snowflake.style.animationDuration = 4 + Math.random() * 6 + "s";
+			snowflake.style.fontSize = 8 + Math.random() * 14 + "px";
+			snowflake.style.opacity = Math.random();
+
+			snowLayer.appendChild(snowflake);
+			setTimeout(() => snowflake.remove(), 10000);
+		}
+		setInterval(createSnowflake, 90);
+
+		window.addEventListener("load", () => {
+			setTimeout(() => document.getElementById("splash").classList.add("hide"), 1500);
+		});
+
+		/* ---------------- GAME ---------------- */
+		const stage = document.getElementById("sbStage");
+		const crosshair = document.getElementById("sbCrosshair");
+
+		const scoreEl = document.getElementById("sbScore");
+		const timeEl = document.getElementById("sbTime");
+		const streakEl = document.getElementById("sbStreak");
+
+		const startBtn = document.getElementById("startBtn");
+		const restartBtn = document.getElementById("restartBtn");
+
+		let running = false;
+		let score = 0;
+		let streak = 0;
+		let timeLeft = 30;
+
+		let spawnInterval = null;
+		let timeInterval = null;
+
+		const balls = [];
+		const targets = [];
+
+		const ASSETS = {
+			snowball: "../images/snowball.png",
+			explosion: "../images/snow_explosion.png",
+			targets: [
+				{ src: "../images/target.png", size: 90, speed: 120, points: 10 },
+				{ src: "../images/target2.png", size: 95, speed: 140, points: 18 },
+				{ src: "../images/target3.png", size: 70, speed: 200, points: 25 }
+			]
+		};
+
+		function rect(el) { return el.getBoundingClientRect(); }
+		function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+		function updateHUD() {
+			scoreEl.textContent = score;
+			timeEl.textContent = timeLeft;
+			streakEl.textContent = streak;
+		}
+
+		/* ---------- EXPLOSION (DOĞRU KOORDİNAT) ---------- */
+		function spawnExplosionOnTarget(targetEl) {
+			const tr = targetEl.getBoundingClientRect();
+			const sr = stage.getBoundingClientRect();
+
+			const x = tr.left - sr.left + tr.width / 2;
+			const y = tr.top - sr.top + tr.height / 2;
+
+			const ex = document.createElement("img");
+			ex.src = ASSETS.explosion;
+			ex.className = "sb-explosion";
+			ex.style.left = x + "px";
+			ex.style.top = y + "px";
+
+			stage.appendChild(ex);
+			setTimeout(() => ex.remove(), 380);
+		}
+
+		/* ---------- AIM ---------- */
+		stage.addEventListener("mousemove", e => {
+			const r = rect(stage);
+			crosshair.style.left = clamp(e.clientX - r.left, 0, r.width) + "px";
+			crosshair.style.top = clamp(e.clientY - r.top, 0, r.height) + "px";
+		});
+
+		/* ---------- SHOOT ---------- */
+		stage.addEventListener("click", e => {
+			if (!running) return;
+
+			const r = rect(stage);
+			const startX = r.width / 2;
+			const startY = r.height * 0.88;
+
+			const tx = e.clientX - r.left;
+			const ty = e.clientY - r.top;
+
+			const dx = tx - startX;
+			const dy = ty - startY;
+			const len = Math.hypot(dx, dy) || 1;
+
+			const ball = document.createElement("img");
+			ball.src = ASSETS.snowball;
+			ball.className = "sb-ball";
+			stage.appendChild(ball);
+
+			balls.push({
+				el: ball,
+				x: startX,
+				y: startY,
+				vx: (dx / len) * 520,
+				vy: (dy / len) * 520
+			});
+		});
+
+		/* ---------- SPAWN TARGET ---------- */
+		function spawnTarget() {
+			const pick = ASSETS.targets[Math.floor(Math.random() * ASSETS.targets.length)];
+			const r = rect(stage);
+
+			const el = document.createElement("img");
+			el.src = pick.src;
+			el.className = "sb-target";
+			el.style.width = pick.size + "px";
+
+			const fromLeft = Math.random() < 0.5;
+			const x = fromLeft ? -pick.size : r.width + pick.size;
+			const y = r.height * 0.15 + Math.random() * r.height * 0.5;
+
+			stage.appendChild(el);
+
+			targets.push({
+				el, x, y,
+				dir: fromLeft ? 1 : -1,
+				speed: pick.speed,
+				points: pick.points,
+				size: pick.size
+			});
+		}
+
+		/* ---------- START / END ---------- */
+		function startGame() {
+			running = true;
+			score = 0; streak = 0; timeLeft = 30;
+			updateHUD();
+
+			targets.forEach(t => t.el.remove());
+			balls.forEach(b => b.el.remove());
+			targets.length = balls.length = 0;
+
+			clearInterval(spawnInterval);
+			clearInterval(timeInterval);
+
+			spawnInterval = setInterval(spawnTarget, 700);
+			timeInterval = setInterval(() => {
+				timeLeft--;
+				updateHUD();
+				if (timeLeft <= 0) endGame();
+			}, 1000);
+		}
+
+		function endGame() {
+			running = false;
+			clearInterval(spawnInterval);
+			clearInterval(timeInterval);
+		}
+
+		startBtn.onclick = startGame;
+		restartBtn.onclick = () => { endGame(); startGame(); };
+
+		/* ---------- LOOP ---------- */
+		let last = performance.now();
+		function tick(now) {
+			const dt = (now - last) / 1000;
+			last = now;
+
+			if (running) {
+
+				balls.forEach((b, i) => {
+					b.x += b.vx * dt;
+					b.y += b.vy * dt;
+					b.el.style.left = b.x + "px";
+					b.el.style.top = b.y + "px";
+				});
+
+				targets.forEach(t => {
+					t.x += t.dir * t.speed * dt;
+					t.el.style.left = t.x + "px";
+					t.el.style.top = t.y + "px";
+				});
+
+				targets.forEach((t, ti) => {
+					balls.forEach((b, bi) => {
+						if (!(rect(t.el).right < rect(b.el).left ||
+							rect(t.el).left > rect(b.el).right ||
+							rect(t.el).bottom < rect(b.el).top ||
+							rect(t.el).top > rect(b.el).bottom)) {
+
+							spawnExplosionOnTarget(t.el);
+
+							score += t.points + streak * 2;
+							streak++;
+							updateHUD();
+
+							t.el.remove();
+							b.el.remove();
+
+							targets.splice(ti, 1);
+							balls.splice(bi, 1);
+						}
+					});
+				});
+			}
+			requestAnimationFrame(tick);
+		}
+		requestAnimationFrame(tick);
+	</script>
+
+
+</body>
+
+</html>
